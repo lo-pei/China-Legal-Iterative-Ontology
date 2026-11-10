@@ -1,0 +1,144 @@
+# 50-application.ttl
+# 适用层：法律适用节点携带推理模式标签与判断状态；类比/归纳输出必须被演绎消费（§一.4）。
+
+@prefix law:  <https://ontology.law-cn.internal/mcl#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# ---------------------------------------------------------------------------
+# 推理链
+# ---------------------------------------------------------------------------
+
+law:推理链 a owl:Class ;
+    rdfs:subClassOf law:构件 ;
+    rdfs:label "推理链"@zh ;
+    rdfs:comment "一条完整的法律适用路径：请求权 → 主要规范 → 构成要件清单 → 涵摄 → 效果。链上节点按 law:节点序号 排序。"@zh ;
+    law:所属层 law:适用层 ;
+    law:锚定计划书条款 "§4.4" .
+
+law:起源请求 a owl:DatatypeProperty ;
+    rdfs:label "起源请求"@zh ;
+    rdfs:domain law:推理链 ;
+    rdfs:range xsd:string ;
+    rdfs:comment "请求权描述，如「出卖人请求买受人支付价款」。"@zh .
+
+law:请求权基础 a owl:ObjectProperty ;
+    rdfs:label "请求权基础"@zh ;
+    rdfs:domain law:推理链 ;
+    rdfs:range law:规则 ;
+    rdfs:comment "作为演绎起点的规则。"@zh .
+
+law:链状态 a owl:ObjectProperty ;
+    rdfs:label "链状态"@zh ;
+    rdfs:domain law:推理链 ;
+    rdfs:range law:判断状态值 ;
+    rdfs:comment "整链判断状态。任一节点为待裁定/有争议时，整链不得标已验证（E-CHAIN-03）。"@zh .
+
+# ---------------------------------------------------------------------------
+# 适用节点
+# ---------------------------------------------------------------------------
+
+law:适用节点 a owl:Class ;
+    rdfs:subClassOf law:构件 ;
+    rdfs:label "适用节点"@zh ;
+    rdfs:comment "推理链上的一步。必须携带推理模式与判断状态（§4.2 适用层）。"@zh ;
+    law:所属层 law:适用层 ;
+    law:锚定计划书条款 "§4.2, §4.3" .
+
+law:属于链 a owl:ObjectProperty ;
+    rdfs:label "属于链"@zh ;
+    rdfs:domain law:适用节点 ;
+    rdfs:range law:推理链 .
+
+law:节点序号 a owl:DatatypeProperty ;
+    rdfs:label "节点序号"@zh ;
+    rdfs:domain law:适用节点 ;
+    rdfs:range xsd:integer ;
+    rdfs:comment "链内顺序，从 1 起。同一链内不得重复。"@zh .
+
+law:具有推理模式 a owl:ObjectProperty ;
+    rdfs:label "具有推理模式"@zh ;
+    rdfs:domain law:适用节点 ;
+    rdfs:range law:推理模式值 ;
+    rdfs:comment "演绎涵摄/类比迁移/归纳提炼/归纳检验。必填（E-APP-01）。"@zh .
+
+law:依据 a owl:ObjectProperty ;
+    rdfs:label "依据"@zh ;
+    rdfs:domain law:适用节点 ;
+    rdfs:comment "该步所依据的规则、要件、因子或前提。必须可追溯，不得为空字符串占位。"@zh .
+
+law:产出 a owl:ObjectProperty ;
+    rdfs:label "产出"@zh ;
+    rdfs:domain law:适用节点 ;
+    rdfs:comment "该步的输出：候选前提、要件结论、效果结论、候选规则等。"@zh .
+
+# ---------------------------------------------------------------------------
+# 类比输出：候选涵摄前提
+# ---------------------------------------------------------------------------
+
+law:涵摄前提 a owl:Class ;
+    rdfs:subClassOf law:构件 ;
+    rdfs:label "涵摄前提"@zh ;
+    rdfs:comment "类比迁移的产物：把先例中的某要件判断迁移为本案的候选前提。必须被演绎消费，否则标「未耦合」。"@zh ;
+    law:所属层 law:适用层 ;
+    law:锚定计划书条款 "§4.4 第 2 步" .
+
+law:前提适用要件 a owl:ObjectProperty ;
+    rdfs:label "前提适用要件"@zh ;
+    rdfs:domain law:涵摄前提 ;
+    rdfs:range law:构成要件 .
+
+law:来源先例 a owl:ObjectProperty ;
+    rdfs:label "来源先例"@zh ;
+    rdfs:domain law:涵摄前提 ;
+    rdfs:range law:案例 ;
+    rdfs:comment "类比所依据的先例。至少 1 个（E-ANA-01）。"@zh .
+
+law:类比相似点 a owl:DatatypeProperty ;
+    rdfs:label "类比相似点"@zh ;
+    rdfs:domain law:涵摄前提 ;
+    rdfs:range xsd:string .
+
+law:类比差异点 a owl:DatatypeProperty ;
+    rdfs:label "类比差异点"@zh ;
+    rdfs:domain law:涵摄前提 ;
+    rdfs:range xsd:string ;
+    rdfs:comment "必须显式记录差异，否则类比不可被审查。「无差异」不得作为默认值。"@zh .
+
+# ---------------------------------------------------------------------------
+# 归纳输出：候选规则
+# ---------------------------------------------------------------------------
+
+law:候选规则 a owl:Class ;
+    rdfs:subClassOf law:规则 ;
+    rdfs:label "候选规则"@zh ;
+    rdfs:comment "归纳提炼的产物。与成文规则同构（同样的要件+效果+类型），差异在证成状态=待检验（§4.2）。"@zh ;
+    law:所属层 law:规范层 ;
+    law:锚定计划书条款 "§4.2, §阶段3" .
+
+law:来源案例集 a owl:ObjectProperty ;
+    rdfs:label "来源案例集"@zh ;
+    rdfs:domain law:候选规则 ;
+    rdfs:range law:案例 ;
+    rdfs:comment "归纳所依据的案例。至少 2 个，否则不构成「呈模式」（E-IND-01）。"@zh .
+
+law:反例 a owl:ObjectProperty ;
+    rdfs:label "反例"@zh ;
+    rdfs:domain law:候选规则 ;
+    rdfs:range law:案例 ;
+    rdfs:comment "归纳检验中识别出的反例。存在未处理反例时不得维持证成状态=待检验，须降级或否定。"@zh .
+
+# ---------------------------------------------------------------------------
+# 耦合：类比/归纳输出必须被演绎消费（§一.4）
+# ---------------------------------------------------------------------------
+
+law:被演绎消费 a owl:DatatypeProperty ;
+    rdfs:label "被演绎消费"@zh ;
+    rdfs:range xsd:boolean ;
+    rdfs:comment "true 表示该类比/归纳产物已被某个演绎涵摄节点作为依据使用。false 或缺失 → 标「未耦合」并进审查（W-UNCOUPLED）。"@zh .
+
+law:消费于 a owl:ObjectProperty ;
+    rdfs:label "消费于"@zh ;
+    rdfs:range law:适用节点 ;
+    rdfs:comment "指向实际消费该产物的演绎涵摄节点。"@zh .

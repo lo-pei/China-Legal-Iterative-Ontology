@@ -1,0 +1,62 @@
+# PROV-0001-tbox-bootstrap.ttl
+# tbox 元模型的溯源登记：这些类与属性从哪来、谁设计的、算什么状态。
+# 内容全部为系统自建元设计，不含法律实质结论（law:非法律结论 true）。
+# 指纹由 tools/validate/validate.py 复算；不一致即元设计发生结构性变更，须有 CON/ADR 并在 META 报告。
+# 修改 tbox 后必须重生成本文件（scripts 见 records/log/LOG-20261110-004.md 的复算方法）。
+
+@prefix law:  <https://ontology.law-cn.internal/mcl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+law:溯源-元模型批次 a law:溯源登记 ;
+    rdfs:label "元模型溯源登记 · 0.1.0-bootstrap"@zh ;
+    law:覆盖范围 "ontology/tbox/*.ttl（7 个文件）" ;
+    law:标注时间 "2026-11-10"^^xsd:date ;
+    law:指纹 "6c0bc9d1de2172e96bae80900c9fee8adb3824cff7a099b397a36c0d640d491b" ;
+    law:溯源状态 law:溯源-自建设计 ;
+    law:非法律结论 true ;
+    law:标注者 "执行 Agent（自举轮）" ;
+    law:锚定计划书条款 "§4.1, §4.2, §4.3" ;
+    rdfs:comment "本批元模型依据计划书 §4.1 四元决策、§4.2 四层结构、§4.3 判断状态自行设计，未导入任何现成法律本体。复核者为项目负责人，阶段 1 验收时确认；复核机制本身待 ESC-0003 裁定。"@zh ;
+    law:文件 law:溯源文件-00 ,
+        law:溯源文件-01 ,
+        law:溯源文件-02 ,
+        law:溯源文件-03 ,
+        law:溯源文件-04 ,
+        law:溯源文件-05 ,
+        law:溯源文件-06 .
+
+law:溯源文件-00 a law:溯源文件项 ;
+    law:文件名 "00-namespace.ttl" ;
+    law:文件指纹 "8a440fa46bbc38aec7bf3093a8eca50cf0ac00ff8950313f42457de7979d3bff" ;
+    law:行数 163 .
+
+law:溯源文件-01 a law:溯源文件项 ;
+    law:文件名 "10-module.ttl" ;
+    law:文件指纹 "583466fad031191fd91d846635168e88e637f924e903cb2581c6035050b98a8f" ;
+    law:行数 45 .
+
+law:溯源文件-02 a law:溯源文件项 ;
+    law:文件名 "20-norm.ttl" ;
+    law:文件指纹 "c3348193384b72f3258c2466ac16280f2bb644c02f9d791301182fae07b512d7" ;
+    law:行数 299 .
+
+law:溯源文件-03 a law:溯源文件项 ;
+    law:文件名 "30-fact.ttl" ;
+    law:文件指纹 "63e069fbcdb2101aad40e15d8d52ed78f595727409e14512f4d48a1077616aa6" ;
+    law:行数 172 .
+
+law:溯源文件-04 a law:溯源文件项 ;
+    law:文件名 "40-case.ttl" ;
+    law:文件指纹 "851243e9eb29004b097a2f9a292efa27c7484bea9a96d3d904d9e26626d0e785" ;
+    law:行数 127 .
+
+law:溯源文件-05 a law:溯源文件项 ;
+    law:文件名 "50-application.ttl" ;
+    law:文件指纹 "0bc532e17c6a5f842ef712757c65c67129733f2cc9ebc78ea7989e0602da7c6b" ;
+    law:行数 144 .
+
+law:溯源文件-06 a law:溯源文件项 ;
+    law:文件名 "60-states.ttl" ;
+    law:文件指纹 "c158380307866595c080e1c3b46a4f091ff5f40b7c01dd63bb812636724dfd8f" ;
+    law:行数 271 .

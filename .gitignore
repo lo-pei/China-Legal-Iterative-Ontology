@@ -1,0 +1,16 @@
+# 生成物与临时文件
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# 投影是可重生成的，但仍纳入版本控制以便审计与 diff；
+# 如需排除，取消下面两行注释（不推荐：审阅层的历史也应可追溯）
+# wiki/
+# vis/index.html
+
+# 编辑器
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>法律本体 · 结构与健康度</title>
+<style>
+  :root {
+    --bg:#F7F8FA; --panel:#FFFFFF; --ink:#1A1D23; --ink2:#5B6472; --line:#E3E6EB;
+    --accent:#7048E8; --red:#D6336C; --warn:#E8590C;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font-family:"Microsoft YaHei","PingFang SC","Noto Sans SC",system-ui,sans-serif;
+         line-height:1.65; font-size:14px; }
+  header { padding:28px 36px 18px; border-bottom:1px solid var(--line); background:var(--panel); }
+  h1 { margin:0 0 6px; font-size:22px; letter-spacing:.3px; }
+  .meta { color:var(--ink2); font-size:12px; }
+  main { padding:24px 36px 60px; max-width:1180px; }
+  h2 { font-size:16px; margin:30px 0 12px; padding-left:10px; border-left:3px solid var(--accent); }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
+  .card b { display:block; font-size:24px; font-weight:700; }
+  .card span { color:var(--ink2); font-size:12px; }
+  .modules { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; }
+  .module { background:var(--panel); border:1px solid var(--line); border-top:3px solid var(--mc);
+             border-radius:10px; padding:14px; }
+  .module h3 { margin:0 0 10px; font-size:14px; display:flex; align-items:center; gap:8px; }
+  .module h3 small { color:var(--ink2); font-weight:400; font-size:11px; margin-left:auto; }
+  .dot { width:9px; height:9px; border-radius:50%; background:var(--mc); display:inline-block; }
+  .chip { display:inline-block; padding:3px 9px; margin:3px 4px 3px 0; border-radius:999px;
+           background:color-mix(in srgb, var(--mc) 12%, white); border:1px solid var(--mc);
+           font-size:12px; }
+  .empty { color:#9AA3AE; font-size:12px; font-style:italic; }
+  .tree ul { list-style:none; margin:0; padding-left:20px; border-left:1px dashed var(--line); }
+  .tree > ul { padding-left:0; border-left:none; }
+  .tree li { margin:6px 0; }
+  .node { display:inline-flex; flex-direction:column; gap:4px; background:var(--panel);
+           border:1px solid var(--line); border-radius:8px; padding:7px 11px; }
+  .node .name { font-size:13px; font-weight:600; }
+  .node .layer { font-size:10px; color:var(--ink2); }
+  .node.root { background:#F1F3F7; }
+  .props { margin-top:2px; display:flex; flex-wrap:wrap; gap:4px; max-width:520px; }
+  .prop { font-size:10px; color:var(--ink2); background:#F1F3F7; border-radius:4px; padding:1px 6px; }
+  .conflict { background:var(--panel); border:1px solid #F3C6D4; border-left:3px solid var(--red);
+               border-radius:8px; padding:8px 12px; margin:6px 0; font-size:12px; }
+  .conflict b { color:var(--red); }
+  .err { font-size:12px; color:#8B1E3F; background:#FFF0F4; border-radius:6px; padding:6px 10px; margin:4px 0; }
+  .ok { font-size:12px; color:#2B8A3E; background:#EBFBEE; border-radius:6px; padding:6px 10px; }
+  .legend { display:flex; flex-wrap:wrap; gap:16px; font-size:12px; color:var(--ink2); }
+  .legend i { display:inline-block; width:14px; height:10px; margin-right:5px; vertical-align:middle; }
+  footer { color:#9AA3AE; font-size:11px; padding:0 36px 30px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>法律本体 · 结构与健康度</h1>
+  <div class="meta">生成于 2026-11-10 22:01 ·
+    事实源 tbox 指纹 6c0bc9d1de2172e9… ·
+    本页为生成物，修改请改 ontology/ 后重跑 tools/vis/render.py</div>
+</header>
+<main>
+
+  <h2>规模与校验</h2>
+  <div class="cards">
+    <div class="card"><b>864</b><span>三元组</span></div>
+    <div class="card"><b>43</b><span>类</span></div>
+    <div class="card"><b>24</b><span>构件类</span></div>
+    <div class="card"><b>0</b><span>法律概念</span></div>
+    <div class="card"><b>0</b><span>规则实例</span></div>
+    <div class="card"><b>1</b><span>校验错误</span></div>
+    <div class="card"><b>0</b><span>校验警告</span></div>
+  </div>
+  <div style="margin-top:10px"><div class="err"><code>E-REL-01</code> RSK-0003 related 指向不存在的记录 META-0001</div></div>
+
+  <h2>五模块（概念分类轴）</h2>
+  <div class="modules"><section class="module" style="--mc:#4C6EF5"><h3><span class="dot"></span>主体模块<small>谁</small></h3><div class="empty">尚无概念（等待 raw/authority/）</div></section><section class="module" style="--mc:#0CA678"><h3><span class="dot"></span>行为模块<small>做了什么</small></h3><div class="empty">尚无概念（等待 raw/authority/）</div></section><section class="module" style="--mc:#7048E8"><h3><span class="dot"></span>规范模块<small>依据什么</small></h3><div class="empty">尚无概念（等待 raw/authority/）</div></section><section class="module" style="--mc:#2F9E44"><h3><span class="dot"></span>关系模块<small>谁对谁主张什么</small></h3><div class="empty">尚无概念（等待 raw/authority/）</div></section><section class="module" style="--mc:#E8590C"><h3><span class="dot"></span>效果模块<small>发生什么</small></h3><div class="empty">尚无概念（等待 raw/authority/）</div></section></div>
+
+  <h2>构件层级（按层归属）</h2>
+  <div class="legend" style="margin-bottom:10px">
+    <span><i style="background:#7048E8"></i>规范层</span><span><i style="background:#0CA678"></i>事实层</span><span><i style="background:#2F9E44"></i>案例层</span><span><i style="background:#E8590C"></i>适用层</span><span><i style="background:#868E96"></i>元层</span>
+  </div>
+  <div class="tree"><div class="node root"><span class="name">构件</span><span class="layer">—</span></div><ul><li><div class="node"><span class="name">争点</span><span class="layer">案例层</span><div class="props"><span class="prop">争点描述</span></div></div></li><li><div class="node"><span class="name">关键事实</span><span class="layer">事实层</span><div class="props"><span class="prop">事实结论</span><span class="prop">填充要件</span><span class="prop">推导路径</span><span class="prop">支撑因子</span></div></div></li><li><div class="node"><span class="name">因子画像</span><span class="layer">案例层</span><div class="props"><span class="prop">画像含因子</span><span class="prop">画像特征向量</span></div></div></li><li><div class="node"><span class="name">因子词表项</span><span class="layer">事实层</span><div class="props"><span class="prop">典型表述</span><span class="prop">因子名称</span><span class="prop">因子编号</span><span class="prop">锚定争点</span><span class="prop">锚定要件</span></div></div></li><li><div class="node"><span class="name">废止条件</span><span class="layer">规范层</span><div class="props"><span class="prop">优先规则</span><span class="prop">废止对象</span><span class="prop">废止理由定位</span><span class="prop">废止生效日</span><span class="prop">归属废止类型</span></div></div></li><li><div class="node"><span class="name">抽象规范</span><span class="layer">规范层</span><div class="props"><span class="prop">具有版本</span><span class="prop">规范名称</span></div></div></li><li><div class="node"><span class="name">推理链</span><span class="layer">适用层</span><div class="props"><span class="prop">请求权基础</span><span class="prop">起源请求</span><span class="prop">链状态</span></div></div></li><li><div class="node"><span class="name">构成要件</span><span class="layer">规范层</span><div class="props"><span class="prop">开放纹理</span><span class="prop">消极要件</span><span class="prop">要件序号</span><span class="prop">要件文本</span><span class="prop">论证负担</span><span class="prop">锚定因子</span></div></div></li><li><div class="node"><span class="name">案例</span><span class="layer">案例层</span><div class="props"><span class="prop">具有因子画像</span><span class="prop">具有深层关联</span><span class="prop">具有要件判定</span><span class="prop">文书号</span></div></div></li><li><div class="node"><span class="name">法律因子</span><span class="layer">事实层</span><div class="props"><span class="prop">具有极性</span><span class="prop">因子对应词表项</span><span class="prop">因子文本</span><span class="prop">证据定位</span></div></div></li><li><div class="node"><span class="name">法律效果</span><span class="layer">规范层</span><div class="props"><span class="prop">归属效果类型</span><span class="prop">效果内容</span><span class="prop">效果指向概念</span></div></div></li><li><div class="node"><span class="name">涵摄前提</span><span class="layer">适用层</span><div class="props"><span class="prop">前提适用要件</span><span class="prop">来源先例</span><span class="prop">类比差异点</span><span class="prop">类比相似点</span></div></div></li><li><div class="node"><span class="name">深层关联</span><span class="layer">案例层</span><div class="props"><span class="prop">关联争点</span><span class="prop">涉及原则</span><span class="prop">涉及政策</span></div></div></li><li><div class="node"><span class="name">生活事实</span><span class="layer">事实层</span><div class="props"><span class="prop">事实文本</span><span class="prop">事实时间</span><span class="prop">事实来源</span><span class="prop">置信度</span></div></div></li><li><div class="node"><span class="name">要件判定</span><span class="layer">案例层</span><div class="props"><span class="prop">依据因子</span><span class="prop">判定结论</span><span class="prop">判定要件</span><span class="prop">说理摘录</span></div></div></li><li><div class="node"><span class="name">规则</span><span class="layer">规范层</span><div class="props"><span class="prop">具有效果</span><span class="prop">具有模态</span><span class="prop">具有要件</span><span class="prop">具有附属模态</span><span class="prop">冲突于</span><span class="prop">受废止于</span><span class="prop">归属规范类型</span><span class="prop">解释支撑</span><span class="prop">证成状态</span><span class="prop">隶属版本</span></div></div><ul><li><div class="node"><span class="name">候选规则</span><span class="layer">规范层</span><div class="props"><span class="prop">反例</span><span class="prop">来源案例集</span></div></div></li></ul></li><li><div class="node"><span class="name">规范文本版本</span><span class="layer">规范层</span><div class="props"><span class="prop">公布日期</span><span class="prop">失效日期</span><span class="prop">文本定位</span><span class="prop">溯及条款</span><span class="prop">版本序号</span><span class="prop">生效日期</span></div></div></li><li><div class="node"><span class="name">适用节点</span><span class="layer">适用层</span><div class="props"><span class="prop">产出</span><span class="prop">依据</span><span class="prop">具有推理模式</span><span class="prop">属于链</span><span class="prop">节点序号</span></div></div></li><li><div class="node"><span class="name">道义模态</span><span class="layer">规范层</span><div class="props"><span class="prop">模态对象</span><span class="prop">模态期限</span><span class="prop">模态条件</span></div></div><ul><li><div class="node"><span class="name">义务</span><span class="layer">规范层</span></div></li><li><div class="node"><span class="name">禁止</span><span class="layer">规范层</span></div></li><li><div class="node"><span class="name">许可</span><span class="layer">规范层</span></div></li></ul></li></ul></div>
+
+  <h2>规范冲突</h2>
+  <div class="empty">无规范冲突记录</div>
+
+  <h2>图例</h2>
+  <div class="legend">
+    <span><i style="border:2px dashed #5B6472;background:transparent"></i>判断状态=候选</span>
+    <span><i style="background:#D6336C"></i>判断状态=待裁定（红色徽标）</span>
+    <span><i style="background:#ADB5BD"></i>判断状态=已否定（灰删除线）</span>
+    <span><i style="background:#7048E8"></i>规范冲突连线</span>
+  </div>
+
+</main>
+<footer>generated-by: tools/vis/render.py · 投影层，不构成第二真值源</footer>
+</body>
+</html>

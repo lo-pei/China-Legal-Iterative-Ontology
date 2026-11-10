@@ -1,0 +1,271 @@
+# shapes.ttl —— 元模型的核心 SHACL 约束
+#
+# 与 tools/validate/validate.py 的分工：
+#   SHACL 负责「单节点、局部」的基数与取值范围（必须有、只能有一个、取值属于词表）。
+#   validate.py 负责「跨节点、跨文档」的约束（因子—关键事实—要件链连通、状态与 ESC 的对应、
+#   记录 related 互指、版本区间不重叠、类层级环）。SHACL 表达不了后者，不要试图塞进来。
+#
+# 校验由 pyshacl 以 inference='rdfs' 执行，因此 law:候选规则 会自动套用 law:规则 的形状。
+
+@prefix law:  <https://ontology.law-cn.internal/mcl#> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# ---------------------------------------------------------------------------
+# 规则：结构完整性（§5.2 门禁 4）
+# ---------------------------------------------------------------------------
+
+law:规则形状 a sh:NodeShape ;
+    sh:targetClass law:规则 ;
+    sh:name "规则结构完整性" ;
+    sh:property [
+        sh:path law:具有要件 ;
+        sh:minCount 1 ;
+        sh:message "规则必须有至少 1 个构成要件（E-RULE-01）" ;
+    ] ;
+    sh:property [
+        sh:path law:具有效果 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "规则必须且只能有 1 个法律效果（E-RULE-02）" ;
+    ] ;
+    sh:property [
+        sh:path law:归属规范类型 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:class law:规范类型值 ;
+        sh:message "规则必须且只能有 1 个规范类型（E-RULE-03）" ;
+    ] ;
+    sh:property [
+        sh:path law:证成状态 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:class law:证成状态值 ;
+        sh:message "规则必须且只能有 1 个证成状态（E-RULE-04）" ;
+    ] ;
+    sh:property [
+        sh:path law:具有模态 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:class law:道义模态 ;
+        sh:message "规则必须且只能有 1 个主模态（E-RULE-05，ADR-0002）" ;
+    ] ;
+    sh:property [
+        sh:path law:隶属版本 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:class law:规范文本版本 ;
+        sh:message "规则必须且只能挂 1 个文本版本（E-RULE-06，ADR-0003）" ;
+    ] .
+
+# ---------------------------------------------------------------------------
+# 构成要件
+# ---------------------------------------------------------------------------
+
+law:构成要件形状 a sh:NodeShape ;
+    sh:targetClass law:构成要件 ;
+    sh:property [
+        sh:path law:要件序号 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:message "构成要件必须有且只有 1 个序号（E-CON-01）" ;
+    ] ;
+    sh:property [
+        sh:path law:要件文本 ;
+        sh:minCount 1 ;
+        sh:minLength 1 ;
+        sh:message "构成要件必须有要件文本（E-CON-02）" ;
+    ] ;
+    sh:property [
+        sh:path law:开放纹理 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:boolean ;
+        sh:message "构成要件必须显式声明是否开放纹理（E-CON-03）" ;
+    ] ;
+    sh:property [
+        sh:path law:消极要件 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:boolean ;
+        sh:message "构成要件必须显式声明是否为消极要件（E-CON-04）" ;
+    ] .
+
+# ---------------------------------------------------------------------------
+# 道义模态：三个槽位（ADR-0002 §4）
+# ---------------------------------------------------------------------------
+
+law:道义模态形状 a sh:NodeShape ;
+    sh:targetClass law:道义模态 ;
+    sh:property [
+        sh:path law:模态对象 ;
+        sh:minCount 1 ;
+        sh:message "道义模态必须有模态对象（E-MOD-02）" ;
+    ] .
+
+# ---------------------------------------------------------------------------
+# 文本版本（ADR-0003 §4）
+# ---------------------------------------------------------------------------
+
+law:规范文本版本形状 a sh:NodeShape ;
+    sh:targetClass law:规范文本版本 ;
+    sh:property [
+        sh:path law:生效日期 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:date ;
+        sh:message "文本版本必须有生效日期（E-VER-03）" ;
+    ] ;
+    sh:property [
+        sh:path law:文本定位 ;
+        sh:minCount 1 ;
+        sh:message "文本版本必须有文本定位，否则溯源链断裂（E-VER-04）" ;
+    ] .
+
+# ---------------------------------------------------------------------------
+# 废止条件（ADR-0004 §4）
+# ---------------------------------------------------------------------------
+
+law:废止条件形状 a sh:NodeShape ;
+    sh:targetClass law:废止条件 ;
+    sh:property [
+        sh:path law:归属废止类型 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "废止条件必须有废止类型（E-DEF-03）" ;
+    ] ;
+    sh:property [
+        sh:path law:废止对象 ;
+        sh:minCount 1 ;
+        sh:message "废止条件必须有废止对象（E-DEF-04）" ;
+    ] ;
+    sh:property [
+        sh:path law:废止生效日 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:date ;
+        sh:message "废止条件必须有废止生效日（E-DEF-05）" ;
+    ] .
+
+# ---------------------------------------------------------------------------
+# 因子与关键事实（§5.1 最小必填）
+# ---------------------------------------------------------------------------
+
+law:法律因子形状 a sh:NodeShape ;
+    sh:targetClass law:法律因子 ;
+    sh:property [
+        sh:path law:因子对应词表项 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "因子实例必须对应一个词表项（E-FAC-02）" ;
+    ] ;
+    sh:property [
+        sh:path law:具有极性 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:class law:极性值 ;
+        sh:message "因子实例必须且只能有 1 个极性（E-FAC-03）" ;
+    ] ;
+    sh:property [
+        sh:path law:标注者 ;
+        sh:minCount 1 ;
+        sh:message "因子实例必须有标注者（E-FAC-04）" ;
+    ] ;
+    sh:property [
+        sh:path law:证据定位 ;
+        sh:minCount 1 ;
+        sh:message "因子实例必须有证据定位（E-FAC-05）" ;
+    ] .
+
+law:关键事实形状 a sh:NodeShape ;
+    sh:targetClass law:关键事实 ;
+    sh:property [
+        sh:path law:填充要件 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "关键事实必须且只能填充 1 个构成要件（E-KF-02）" ;
+    ] ;
+    sh:property [
+        sh:path law:支撑因子 ;
+        sh:minCount 1 ;
+        sh:message "关键事实必须有支撑因子，否则无法回溯（E-KF-03）" ;
+    ] ;
+    sh:property [
+        sh:path law:推导路径 ;
+        sh:minCount 1 ;
+        sh:message "关键事实必须有推导路径（E-KF-04）" ;
+    ] ;
+    sh:property [
+        sh:path law:标注者 ;
+        sh:minCount 1 ;
+        sh:message "关键事实必须有标注者（E-KF-05）" ;
+    ] ;
+    sh:property [
+        sh:path law:复核者 ;
+        sh:minCount 1 ;
+        sh:message "关键事实必须有复核者（E-KF-06，见 RSK-0002）" ;
+    ] ;
+    sh:property [
+        sh:path law:判断状态 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "关键事实必须有且只有 1 个判断状态（E-KF-07）" ;
+    ] .
+
+# ---------------------------------------------------------------------------
+# 案例（§5.1 案例最小必填）
+# ---------------------------------------------------------------------------
+
+law:案例形状 a sh:NodeShape ;
+    sh:targetClass law:案例 ;
+    sh:property [
+        sh:path law:文书号 ;
+        sh:minCount 1 ;
+        sh:message "案例必须有文书号（E-CASE-02）" ;
+    ] ;
+    sh:property [
+        sh:path law:具有因子画像 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "案例必须且只能有 1 个因子画像（E-CASE-03）" ;
+    ] ;
+    sh:property [
+        sh:path law:标注版本 ;
+        sh:minCount 1 ;
+        sh:message "案例必须有标注版本（E-CASE-04）" ;
+    ] .
+
+# ---------------------------------------------------------------------------
+# 适用节点与类比/归纳输出（§4.2、§4.3、§一.4）
+# ---------------------------------------------------------------------------
+
+law:适用节点形状 a sh:NodeShape ;
+    sh:targetClass law:适用节点 ;
+    sh:property [
+        sh:path law:具有推理模式 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:class law:推理模式值 ;
+        sh:message "适用节点必须且只能有 1 个推理模式（E-APP-02）" ;
+    ] ;
+    sh:property [
+        sh:path law:节点序号 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:message "适用节点必须有节点序号（E-APP-03）" ;
+    ] ;
+    sh:property [
+        sh:path law:属于链 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "适用节点必须属于且只属于 1 条推理链（E-APP-04）" ;
+    ] ;
+    sh:property [
+        sh:path law:判断状态 ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "适用节点必须有且只有 1 个判断状态（E-APP-05）" ;
+    ] .
+
+law:涵摄前提形状 a sh:NodeShape ;
+    sh:targetClass law:涵摄前提 ;
+    sh:property [
+        sh:path law:来源先例 ;
+        sh:minCount 1 ;
+        sh:message "候选涵摄前提必须至少有 1 个来源先例（E-ANA-02）" ;
+    ] ;
+    sh:property [
+        sh:path law:类比差异点 ;
+        sh:minCount 1 ;
+        sh:message "候选涵摄前提必须显式记录差异点，不得默认「无差异」（E-ANA-03）" ;
+    ] .
+
+law:候选规则形状 a sh:NodeShape ;
+    sh:targetClass law:候选规则 ;
+    sh:property [
+        sh:path law:来源案例集 ;
+        sh:minCount 2 ;
+        sh:message "候选规则必须至少来自 2 个案例，否则不构成「呈模式」（E-IND-02）" ;
+    ] .

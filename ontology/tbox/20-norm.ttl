@@ -1,0 +1,299 @@
+# 20-norm.ttl
+# 规范层：规则、构成要件、法律效果、道义模态（ADR-0002）、文本版本双层（ADR-0003）、废止条件（ADR-0004）。
+# 本文件定义承载结构，不含具体规则实例。规则实例落 ontology/abox/rules/，须溯源到 raw/authority/。
+
+@prefix law:  <https://ontology.law-cn.internal/mcl#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# ---------------------------------------------------------------------------
+# 规则
+# ---------------------------------------------------------------------------
+
+law:规则 a owl:Class ;
+    rdfs:subClassOf law:构件 ;
+    rdfs:label "规则"@zh ;
+    rdfs:comment "法律规则 = 构成要件集 + 法律效果 + 规范类型 + 道义模态。成文规则与候选规则同构，差异只在证成状态与来源（§4.2）。"@zh ;
+    law:所属层 law:规范层 ;
+    law:锚定计划书条款 "§4.2" .
+
+law:具有要件 a owl:ObjectProperty ;
+    rdfs:label "具有要件"@zh ;
+    rdfs:domain law:规则 ;
+    rdfs:range law:构成要件 ;
+    rdfs:comment "规则到其构成要件的属性。至少 1 个（E-RULE-01）。要件顺序由 law:要件序号 表达。"@zh .
+
+law:具有效果 a owl:ObjectProperty ;
+    rdfs:label "具有效果"@zh ;
+    rdfs:domain law:规则 ;
+    rdfs:range law:法律效果 ;
+    rdfs:comment "规则到法律效果。恰好 1 个（E-RULE-02）。"@zh .
+
+law:具有模态 a owl:ObjectProperty ;
+    rdfs:label "具有模态"@zh ;
+    rdfs:domain law:规则 ;
+    rdfs:range law:道义模态 ;
+    rdfs:comment "规则的主道义模态。恰好 1 个（E-RULE-05，ADR-0002 §4）。"@zh .
+
+law:具有附属模态 a owl:ObjectProperty ;
+    rdfs:label "具有附属模态"@zh ;
+    rdfs:domain law:规则 ;
+    rdfs:range law:道义模态 ;
+    rdfs:comment "多模态条文中的次要模态（如「原则允许、例外禁止」中的例外）。0..n。"@zh .
+
+law:归属规范类型 a owl:ObjectProperty ;
+    rdfs:label "归属规范类型"@zh ;
+    rdfs:domain law:规则 ;
+    rdfs:range law:规范类型值 ;
+    rdfs:comment "主要/辅助/防御，三选一（E-RULE-03）。"@zh .
+
+law:证成状态 a owl:ObjectProperty ;
+    rdfs:label "证成状态"@zh ;
+    rdfs:domain law:规则 ;
+    rdfs:range law:证成状态值 ;
+    rdfs:comment "已确立 / 待检验。与判断状态构成 ADR-0007 §2.4 的不变式。"@zh .
+
+law:隶属版本 a owl:ObjectProperty ;
+    rdfs:label "隶属版本"@zh ;
+    rdfs:domain law:规则 ;
+    rdfs:range law:规范文本版本 ;
+    rdfs:comment "规则必须挂到且仅挂到一个文本版本；日期由版本承载（ADR-0003 §4）。"@zh .
+
+law:解释支撑 a owl:ObjectProperty ;
+    rdfs:label "解释支撑"@zh ;
+    rdfs:domain law:规则 ;
+    rdfs:comment "规范的「解释支撑」关系，可指向先例或辅助规范（§4.2）。"@zh .
+
+law:冲突于 a owl:ObjectProperty ;
+    rdfs:label "冲突于"@zh ;
+    rdfs:domain law:规则 ;
+    rdfs:range law:规则 ;
+    rdfs:comment "规范冲突。冲突的裁断属法律实质判断，无法确定时置 pending-escalation 并写 ESC（§4.4 第 5 步）。"@zh .
+
+# ---------------------------------------------------------------------------
+# 构成要件
+# ---------------------------------------------------------------------------
+
+law:构成要件 a owl:Class ;
+    rdfs:subClassOf law:构件 ;
+    rdfs:label "构成要件"@zh ;
+    rdfs:comment "规则成立所需的条件单元。但书型例外建为负极性要件（law:消极要件 true），不得与废止条件混用（ADR-0004 §2.4）。"@zh ;
+    law:所属层 law:规范层 ;
+    law:锚定计划书条款 "§4.4" .
+
+law:要件序号 a owl:DatatypeProperty ;
+    rdfs:label "要件序号"@zh ;
+    rdfs:domain law:构成要件 ;
+    rdfs:range xsd:integer ;
+    rdfs:comment "要件在规则中的排列序号，从 1 起。"@zh .
+
+law:要件文本 a owl:DatatypeProperty ;
+    rdfs:label "要件文本"@zh ;
+    rdfs:domain law:构成要件 ;
+    rdfs:range xsd:string ;
+    rdfs:comment "要件的规范表述（尽量贴近原文，不改写）。"@zh .
+
+law:开放纹理 a owl:DatatypeProperty ;
+    rdfs:label "开放纹理"@zh ;
+    rdfs:domain law:构成要件 ;
+    rdfs:range xsd:boolean ;
+    rdfs:comment "true 表示该要件的边界需价值填充，是触发类比迁移的入口（§4.4 第 2 步）。"@zh .
+
+law:消极要件 a owl:DatatypeProperty ;
+    rdfs:label "消极要件"@zh ;
+    rdfs:domain law:构成要件 ;
+    rdfs:range xsd:boolean ;
+    rdfs:comment "true 表示该要件为否定性条件（但书），要件成立意味着相应事实「不存在」。"@zh .
+
+law:锚定因子 a owl:ObjectProperty ;
+    rdfs:label "锚定因子"@zh ;
+    rdfs:domain law:构成要件 ;
+    rdfs:range law:因子词表项 ;
+    rdfs:comment "要件到因子词表项。要件无任何锚定因子时，要件—关键事实链无法闭合（E-CHAIN-02）。"@zh .
+
+law:论证负担 a owl:DatatypeProperty ;
+    rdfs:label "论证负担"@zh ;
+    rdfs:domain law:构成要件 ;
+    rdfs:range xsd:string ;
+    rdfs:comment "该要件的证明责任归属与论证强度要求。属法律实质内容，须溯源，不得由系统推定。"@zh .
+
+# ---------------------------------------------------------------------------
+# 法律效果
+# ---------------------------------------------------------------------------
+
+law:法律效果 a owl:Class ;
+    rdfs:subClassOf law:构件 ;
+    rdfs:label "法律效果"@zh ;
+    rdfs:comment "规则适用后发生的法律变动。可携带模态（效果包含义务时），与规则本身的模态区分（ADR-0002 §3）。"@zh ;
+    law:所属层 law:规范层 ;
+    law:锚定计划书条款 "§4.2" .
+
+law:归属效果类型 a owl:ObjectProperty ;
+    rdfs:label "归属效果类型"@zh ;
+    rdfs:domain law:法律效果 ;
+    rdfs:range law:效果类型值 ;
+    rdfs:comment "给付/形成/确认/抗辩/责任。"@zh .
+
+law:效果内容 a owl:DatatypeProperty ;
+    rdfs:label "效果内容"@zh ;
+    rdfs:domain law:法律效果 ;
+    rdfs:range xsd:string .
+
+law:效果指向概念 a owl:ObjectProperty ;
+    rdfs:label "效果指向概念"@zh ;
+    rdfs:domain law:法律效果 ;
+    rdfs:comment "效果层与概念层的联接点（ADR-0006 §2「二者的联接点」），指向效果模块的法律概念类。"@zh .
+
+# ---------------------------------------------------------------------------
+# 道义模态（ADR-0002）
+# ---------------------------------------------------------------------------
+
+law:道义模态 a owl:Class ;
+    rdfs:subClassOf law:构件 ;
+    rdfs:label "道义模态"@zh ;
+    rdfs:comment "规范对行为的评价方式。独立成类而非规则属性值，以便承载条件/对象/期限三个槽位（ADR-0002）。"@zh ;
+    law:所属层 law:规范层 ;
+    law:锚定计划书条款 "§4.1 元决策一" .
+
+law:义务 a owl:Class ;
+    rdfs:subClassOf law:道义模态 ;
+    rdfs:label "义务"@zh ;
+    rdfs:comment "应为一定行为或不行为。"@zh .
+
+law:许可 a owl:Class ;
+    rdfs:subClassOf law:道义模态 ;
+    rdfs:label "许可"@zh ;
+    rdfs:comment "允许为一定行为。"@zh .
+
+law:禁止 a owl:Class ;
+    rdfs:subClassOf law:道义模态 ;
+    rdfs:label "禁止"@zh ;
+    rdfs:comment "不得为一定行为。"@zh .
+
+law:模态条件 a owl:DatatypeProperty ;
+    rdfs:label "模态条件"@zh ;
+    rdfs:domain law:道义模态 ;
+    rdfs:range xsd:string ;
+    rdfs:comment "该模态生效所依赖的情境条件。可空，空时须在标注中说明「条件已并入构成要件」（ADR-0002 §4）。"@zh .
+
+law:模态对象 a owl:DatatypeProperty ;
+    rdfs:label "模态对象"@zh ;
+    rdfs:domain law:道义模态 ;
+    rdfs:range xsd:string ;
+    rdfs:comment "义务/许可/禁止所指向的行为或状态。必填。"@zh .
+
+law:模态期限 a owl:DatatypeProperty ;
+    rdfs:label "模态期限"@zh ;
+    rdfs:domain law:道义模态 ;
+    rdfs:range xsd:string ;
+    rdfs:comment "履行期、存续期、除斥期间等时间限定。可空。"@zh .
+
+# ---------------------------------------------------------------------------
+# 时间性：抽象规范 — 文本版本双层（ADR-0003）
+# ---------------------------------------------------------------------------
+
+law:抽象规范 a owl:Class ;
+    rdfs:subClassOf law:构件 ;
+    rdfs:label "抽象规范"@zh ;
+    rdfs:comment "规范身份层：同一规范跨修订保持同一身份，只携带稳定标识与名称。"@zh ;
+    law:所属层 law:规范层 ;
+    law:锚定计划书条款 "§4.1 元决策二" .
+
+law:规范名称 a owl:DatatypeProperty ;
+    rdfs:label "规范名称"@zh ;
+    rdfs:domain law:抽象规范 ;
+    rdfs:range xsd:string .
+
+law:具有版本 a owl:ObjectProperty ;
+    rdfs:label "具有版本"@zh ;
+    rdfs:domain law:抽象规范 ;
+    rdfs:range law:规范文本版本 ;
+    rdfs:comment "抽象规范至少有一个文本版本（E-VER-01）。"@zh .
+
+law:规范文本版本 a owl:Class ;
+    rdfs:subClassOf law:构件 ;
+    rdfs:label "规范文本版本"@zh ;
+    rdfs:comment "某一时点的文本表述，携带公布/生效/失效日期。日期一律由版本承载（ADR-0003）。"@zh ;
+    law:所属层 law:规范层 ;
+    law:锚定计划书条款 "§4.1 元决策二" .
+
+law:公布日期 a owl:DatatypeProperty ;
+    rdfs:label "公布日期"@zh ;
+    rdfs:domain law:规范文本版本 ;
+    rdfs:range xsd:date .
+
+law:生效日期 a owl:DatatypeProperty ;
+    rdfs:label "生效日期"@zh ;
+    rdfs:domain law:规范文本版本 ;
+    rdfs:range xsd:date ;
+    rdfs:comment "必填，且必须来自 raw/authority/；系统不得推定（ADR-0003 §4）。"@zh .
+
+law:失效日期 a owl:DatatypeProperty ;
+    rdfs:label "失效日期"@zh ;
+    rdfs:domain law:规范文本版本 ;
+    rdfs:range xsd:date ;
+    rdfs:comment "可空。空表示截至建模时点仍有效。"@zh .
+
+law:版本序号 a owl:DatatypeProperty ;
+    rdfs:label "版本序号"@zh ;
+    rdfs:domain law:规范文本版本 ;
+    rdfs:range xsd:integer .
+
+law:文本定位 a owl:DatatypeProperty ;
+    rdfs:label "文本定位"@zh ;
+    rdfs:domain law:规范文本版本 ;
+    rdfs:range xsd:string ;
+    rdfs:comment "指向 raw/authority/ 的定位串：文件名 + 条号 + 字符区间。溯源链的锚点（§5.2 门禁 2）。"@zh .
+
+law:溯及条款 a owl:DatatypeProperty ;
+    rdfs:label "溯及条款"@zh ;
+    rdfs:domain law:规范文本版本 ;
+    rdfs:range xsd:string ;
+    rdfs:comment "溯及适用的特别规定。不得改写版本日期来替代（ADR-0003 §4）。"@zh .
+
+# ---------------------------------------------------------------------------
+# 可废止性：废止条件独立槽位（ADR-0004）
+# ---------------------------------------------------------------------------
+
+law:废止条件 a owl:Class ;
+    rdfs:subClassOf law:构件 ;
+    rdfs:label "废止条件"@zh ;
+    rdfs:comment "使规则效力消灭或适用被排除的外部条件。独立节点，可携带时间与优先规则（ADR-0004）。"@zh ;
+    law:所属层 law:规范层 ;
+    law:锚定计划书条款 "§4.1 元决策三" .
+
+law:废止对象 a owl:ObjectProperty ;
+    rdfs:label "废止对象"@zh ;
+    rdfs:domain law:废止条件 ;
+    rdfs:comment "被废止或受限制的规则 / 规范文本版本 / 构成要件。必填。"@zh .
+
+law:归属废止类型 a owl:ObjectProperty ;
+    rdfs:label "归属废止类型"@zh ;
+    rdfs:domain law:废止条件 ;
+    rdfs:range law:废止类型值 ;
+    rdfs:comment "六类：后法废止/上位法废止/特别法优先/目的性限缩/约定排除/要件不成立。"@zh .
+
+law:废止生效日 a owl:DatatypeProperty ;
+    rdfs:label "废止生效日"@zh ;
+    rdfs:domain law:废止条件 ;
+    rdfs:range xsd:date ;
+    rdfs:comment "必填。使「2021 年的行为适用废止前还是废止后规则」可回答。"@zh .
+
+law:优先规则 a owl:DatatypeProperty ;
+    rdfs:label "优先规则"@zh ;
+    rdfs:domain law:废止条件 ;
+    rdfs:range xsd:string ;
+    rdfs:comment "特别法优先时必须填写（E-DEF-02），否则冲突无从裁断。属法律实质内容，须溯源。"@zh .
+
+law:废止理由定位 a owl:DatatypeProperty ;
+    rdfs:label "废止理由定位"@zh ;
+    rdfs:domain law:废止条件 ;
+    rdfs:range xsd:string ;
+    rdfs:comment "指向权威材料或案例说理中的废止依据。"@zh .
+
+law:受废止于 a owl:ObjectProperty ;
+    rdfs:label "受废止于"@zh ;
+    rdfs:domain law:规则 ;
+    rdfs:range law:废止条件 ;
+    rdfs:comment "反向属性，便于查询「某规则受哪些废止条件限制」。"@zh .

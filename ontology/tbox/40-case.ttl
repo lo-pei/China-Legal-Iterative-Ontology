@@ -1,0 +1,127 @@
+# 40-case.ttl
+# 案例层三要素：因子画像（含极性）+ 要件判定记录 + 深层关联（争点、原则、政策）。
+
+@prefix law:  <https://ontology.law-cn.internal/mcl#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+law:案例 a owl:Class ;
+    rdfs:subClassOf law:构件 ;
+    rdfs:label "案例"@zh ;
+    rdfs:comment "整案结构。最小必填：因子画像、要件判定记录、深层关联、来源文书号、标注版本（§5.1）。"@zh ;
+    law:所属层 law:案例层 ;
+    law:锚定计划书条款 "§4.2, §5.1" .
+
+law:文书号 a owl:DatatypeProperty ;
+    rdfs:label "文书号"@zh ;
+    rdfs:domain law:案例 ;
+    rdfs:range xsd:string ;
+    rdfs:comment "判决书案号。溯源的唯一外部锚点，不得省略或改写格式。"@zh .
+
+law:具有因子画像 a owl:ObjectProperty ;
+    rdfs:label "具有因子画像"@zh ;
+    rdfs:domain law:案例 ;
+    rdfs:range law:因子画像 ;
+    rdfs:comment "恰好 1 个（E-CASE-01）。"@zh .
+
+law:具有要件判定 a owl:ObjectProperty ;
+    rdfs:label "具有要件判定"@zh ;
+    rdfs:domain law:案例 ;
+    rdfs:range law:要件判定 ;
+    rdfs:comment "0..n。每一条要件判定对应一个构成要件。"@zh .
+
+law:具有深层关联 a owl:ObjectProperty ;
+    rdfs:label "具有深层关联"@zh ;
+    rdfs:domain law:案例 ;
+    rdfs:range law:深层关联 ;
+    rdfs:comment "0..1。承载争点与原则/政策，是类比检索的第二道过滤。"@zh .
+
+# ---------------------------------------------------------------------------
+# 因子画像：案例维度的因子聚合，类比的比较平面
+# ---------------------------------------------------------------------------
+
+law:因子画像 a owl:Class ;
+    rdfs:subClassOf law:构件 ;
+    rdfs:label "因子画像"@zh ;
+    rdfs:comment "某案例的因子集合及其极性分布。类比时按画像相近度检索先例（§4.4 第 2 步）。"@zh ;
+    law:所属层 law:案例层 ;
+    law:锚定计划书条款 "§4.2" .
+
+law:画像含因子 a owl:ObjectProperty ;
+    rdfs:label "画像含因子"@zh ;
+    rdfs:domain law:因子画像 ;
+    rdfs:range law:法律因子 .
+
+law:画像特征向量 a owl:DatatypeProperty ;
+    rdfs:label "画像特征向量"@zh ;
+    rdfs:domain law:因子画像 ;
+    rdfs:range xsd:string ;
+    rdfs:comment "由工具生成的稀疏特征串（因子编号:极性）。生成物，不得手改。"@zh .
+
+# ---------------------------------------------------------------------------
+# 要件判定记录
+# ---------------------------------------------------------------------------
+
+law:要件判定 a owl:Class ;
+    rdfs:subClassOf law:构件 ;
+    rdfs:label "要件判定"@zh ;
+    rdfs:comment "针对某一构成要件在本案中是否满足的判定记录。每条的判断状态独立（§4.3）。"@zh ;
+    law:所属层 law:案例层 ;
+    law:锚定计划书条款 "§4.2" .
+
+law:判定要件 a owl:ObjectProperty ;
+    rdfs:label "判定要件"@zh ;
+    rdfs:domain law:要件判定 ;
+    rdfs:range law:构成要件 ;
+    rdfs:comment "必填。指向被判定之要件。"@zh .
+
+law:判定结论 a owl:ObjectProperty ;
+    rdfs:label "判定结论"@zh ;
+    rdfs:domain law:要件判定 ;
+    rdfs:range law:判定结论值 ;
+    rdfs:comment "满足/不满足/待证/无法裁定。取「无法裁定」时必须置 pending-escalation 并写 ESC。"@zh .
+
+law:依据因子 a owl:ObjectProperty ;
+    rdfs:label "依据因子"@zh ;
+    rdfs:domain law:要件判定 ;
+    rdfs:range law:法律因子 .
+
+law:说理摘录 a owl:DatatypeProperty ;
+    rdfs:label "说理摘录"@zh ;
+    rdfs:domain law:要件判定 ;
+    rdfs:range xsd:string ;
+    rdfs:comment "判决书说理原文摘录（不改写）。是「论证可追溯」而非「结论正确」的证据。"@zh .
+
+# ---------------------------------------------------------------------------
+# 深层关联
+# ---------------------------------------------------------------------------
+
+law:深层关联 a owl:Class ;
+    rdfs:subClassOf law:构件 ;
+    rdfs:label "深层关联"@zh ;
+    rdfs:comment "争点 + 原则/政策。用于判断两案是否「同争点」，避免仅凭因子表面相似而误判类比成立。"@zh ;
+    law:所属层 law:案例层 ;
+    law:锚定计划书条款 "§4.2" .
+
+law:关联争点 a owl:ObjectProperty ;
+    rdfs:label "关联争点"@zh ;
+    rdfs:domain law:深层关联 ;
+    rdfs:range law:争点 .
+
+law:涉及原则 a owl:DatatypeProperty ;
+    rdfs:label "涉及原则"@zh ;
+    rdfs:domain law:深层关联 ;
+    rdfs:range xsd:string ;
+    rdfs:comment "如诚信原则、公平原则。须与权威材料或说理原文对应，不得由系统归纳后直接填写。"@zh .
+
+law:涉及政策 a owl:DatatypeProperty ;
+    rdfs:label "涉及政策"@zh ;
+    rdfs:domain law:深层关联 ;
+    rdfs:range xsd:string ;
+    rdfs:comment "交易安全、消费者保护等政策性考量。"@zh .
+
+law:标注版本 a owl:DatatypeProperty ;
+    rdfs:label "标注版本"@zh ;
+    rdfs:range xsd:string ;
+    rdfs:comment "标注版本号，与阶段 tag 对应（§5.2 门禁 5）。"@zh .

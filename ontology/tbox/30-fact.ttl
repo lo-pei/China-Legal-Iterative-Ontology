@@ -1,0 +1,172 @@
+# 30-fact.ttl
+# 事实层：生活事实 → 法律因子（论证功能标签，类比操作平面）→ 关键事实（要件事实）。
+# 因子与关键事实多对多，显式建模（§4.2）。
+
+@prefix law:  <https://ontology.law-cn.internal/mcl#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# ---------------------------------------------------------------------------
+# 生活事实：原子陈述
+# ---------------------------------------------------------------------------
+
+law:生活事实 a owl:Class ;
+    rdfs:subClassOf law:构件 ;
+    rdfs:label "生活事实"@zh ;
+    rdfs:comment "未经法律评价的原子陈述。最小必填：文本、来源、时间、抽取者、置信度（§5.1）。"@zh ;
+    law:所属层 law:事实层 ;
+    law:锚定计划书条款 "§5.1" .
+
+law:事实文本 a owl:DatatypeProperty ;
+    rdfs:label "事实文本"@zh ;
+    rdfs:domain law:生活事实 ;
+    rdfs:range xsd:string .
+
+law:事实来源 a owl:DatatypeProperty ;
+    rdfs:label "事实来源"@zh ;
+    rdfs:domain law:生活事实 ;
+    rdfs:range xsd:string ;
+    rdfs:comment "指向 raw/judgments/ 的定位串（文书号 + 段落号）。"@zh .
+
+law:事实时间 a owl:DatatypeProperty ;
+    rdfs:label "事实时间"@zh ;
+    rdfs:domain law:生活事实 ;
+    rdfs:range xsd:string ;
+    rdfs:comment "事件发生时间。可为区间或不确定表述，故用 string 而非 xsd:date。"@zh .
+
+law:置信度 a owl:DatatypeProperty ;
+    rdfs:label "置信度"@zh ;
+    rdfs:domain law:生活事实 ;
+    rdfs:range xsd:decimal ;
+    rdfs:comment "抽取置信度，0–1。不是判断状态：置信度高不等于法律上成立。"@zh .
+
+law:抽取者 a owl:DatatypeProperty ;
+    rdfs:label "抽取者"@zh ;
+    rdfs:range xsd:string .
+
+# ---------------------------------------------------------------------------
+# 因子词表项（词表层，自下而上收敛，§阶段 4）
+# ---------------------------------------------------------------------------
+
+law:因子词表项 a owl:Class ;
+    rdfs:subClassOf law:构件 ;
+    rdfs:label "因子词表项"@zh ;
+    rdfs:comment "因子词表的条目。每个词表项必须锚定至少一个构成要件或争点，否则为「悬浮」（E-ANC-02）。"@zh ;
+    law:所属层 law:事实层 ;
+    law:锚定计划书条款 "§阶段4 决策点" .
+
+law:因子编号 a owl:DatatypeProperty ;
+    rdfs:label "因子编号"@zh ;
+    rdfs:domain law:因子词表项 ;
+    rdfs:range xsd:string ;
+    rdfs:comment "稳定编号，形如 F-0001。发布后不复用。"@zh .
+
+law:因子名称 a owl:DatatypeProperty ;
+    rdfs:label "因子名称"@zh ;
+    rdfs:domain law:因子词表项 ;
+    rdfs:range xsd:string .
+
+law:典型表述 a owl:DatatypeProperty ;
+    rdfs:label "典型表述"@zh ;
+    rdfs:domain law:因子词表项 ;
+    rdfs:range xsd:string ;
+    rdfs:comment "判决书中的典型措辞示例，用于标注者识别。不含结论性评价。"@zh .
+
+law:锚定要件 a owl:ObjectProperty ;
+    rdfs:label "锚定要件"@zh ;
+    rdfs:domain law:因子词表项 ;
+    rdfs:range law:构成要件 ;
+    rdfs:comment "因子到构成要件。与 law:锚定争点 至少满足其一（E-ANC-02）。"@zh .
+
+law:锚定争点 a owl:ObjectProperty ;
+    rdfs:label "锚定争点"@zh ;
+    rdfs:domain law:因子词表项 ;
+    rdfs:range law:争点 ;
+    rdfs:comment "因子到争点。用于类比检索的争点同源过滤（§4.4 第 2 步）。"@zh .
+
+# ---------------------------------------------------------------------------
+# 争点（类比检索的过滤维度之一）
+# ---------------------------------------------------------------------------
+
+law:争点 a owl:Class ;
+    rdfs:subClassOf law:构件 ;
+    rdfs:label "争点"@zh ;
+    rdfs:comment "案件中的争议焦点。类比检索时「深层关联同争点」的判据（§4.4 第 2 步）。"@zh ;
+    law:所属层 law:案例层 ;
+    law:锚定计划书条款 "§4.2" .
+
+law:争点描述 a owl:DatatypeProperty ;
+    rdfs:label "争点描述"@zh ;
+    rdfs:domain law:争点 ;
+    rdfs:range xsd:string .
+
+# ---------------------------------------------------------------------------
+# 法律因子实例（案例内的因子出现，含极性）
+# ---------------------------------------------------------------------------
+
+law:法律因子 a owl:Class ;
+    rdfs:subClassOf law:构件 ;
+    rdfs:label "法律因子"@zh ;
+    rdfs:comment "因子的案例内实例，带极性与标注。它不是法律概念，不归五模块（ADR-0006 §3 理由 1）。"@zh ;
+    law:所属层 law:事实层 ;
+    law:锚定计划书条款 "§4.2, §5.1" .
+
+law:因子对应词表项 a owl:ObjectProperty ;
+    rdfs:label "因子对应词表项"@zh ;
+    rdfs:domain law:法律因子 ;
+    rdfs:range law:因子词表项 ;
+    rdfs:comment "实例到词表项的引用。必填，否则该因子不可被跨案例比较。"@zh .
+
+law:具有极性 a owl:ObjectProperty ;
+    rdfs:label "具有极性"@zh ;
+    rdfs:domain law:法律因子 ;
+    rdfs:range law:极性值 ;
+    rdfs:comment "正向/负向/中性。描述该因子对相应要件成立的指向，不描述事实真假。"@zh .
+
+law:因子文本 a owl:DatatypeProperty ;
+    rdfs:label "因子文本"@zh ;
+    rdfs:domain law:法律因子 ;
+    rdfs:range xsd:string ;
+    rdfs:comment "该因子在本案中的具体表述（含关键数额、时间、当事人）。"@zh .
+
+law:证据定位 a owl:DatatypeProperty ;
+    rdfs:label "证据定位"@zh ;
+    rdfs:domain law:法律因子 ;
+    rdfs:range xsd:string ;
+    rdfs:comment "支撑该因子的证据或说理在判决书中的位置。"@zh .
+
+# ---------------------------------------------------------------------------
+# 关键事实（要件事实结论）
+# ---------------------------------------------------------------------------
+
+law:关键事实 a owl:Class ;
+    rdfs:subClassOf law:构件 ;
+    rdfs:label "关键事实"@zh ;
+    rdfs:comment "要件事实结论：某构成要件在本案中是否被满足。最小必填含判断状态（§5.1）。"@zh ;
+    law:所属层 law:事实层 ;
+    law:锚定计划书条款 "§5.1" .
+
+law:填充要件 a owl:ObjectProperty ;
+    rdfs:label "填充要件"@zh ;
+    rdfs:domain law:关键事实 ;
+    rdfs:range law:构成要件 ;
+    rdfs:comment "关键事实所对应的构成要件。必填。"@zh .
+
+law:支撑因子 a owl:ObjectProperty ;
+    rdfs:label "支撑因子"@zh ;
+    rdfs:domain law:关键事实 ;
+    rdfs:range law:法律因子 ;
+    rdfs:comment "支撑该结论的因子集。与 law:填充要件 构成「因子—关键事实—构成要件」链，由 E-CHAIN-01 校验连通。"@zh .
+
+law:推导路径 a owl:DatatypeProperty ;
+    rdfs:label "推导路径"@zh ;
+    rdfs:domain law:关键事实 ;
+    rdfs:range xsd:string ;
+    rdfs:comment "从因子到要件结论的推导步骤（自然语言 + 节点编号），供人类复现。"@zh .
+
+law:事实结论 a owl:DatatypeProperty ;
+    rdfs:label "事实结论"@zh ;
+    rdfs:domain law:关键事实 ;
+    rdfs:range xsd:string ;
+    rdfs:comment "要件成立/不成立/待证的表述。法律实质判断，须溯源或标 pending-escalation。"@zh .

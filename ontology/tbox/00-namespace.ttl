@@ -1,0 +1,163 @@
+# 00-namespace.ttl
+# 命名空间、本体头、以及「层」轴（ADR-0006 轴二）与构件根类。
+# 全部内容为自建模构件，不含任何法律概念断言（law:非法律结论 true）。
+# 修改本文件前必须有 ADR 或 CON（SCHEMA.md §3）。
+#
+# 本体论约定：模块是「类」（概念靠 subClassOf 归类）；层、状态值是「个体」。
+# 这条区分是硬的：模块需要类层级与互斥声明，层与状态值只需可被引用。
+
+@prefix law:  <https://ontology.law-cn.internal/mcl#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+law:本体 a owl:Ontology ;
+    rdfs:label "中国民事法律推理本体（受控子领域）"@zh ;
+    rdfs:comment "以演绎涵摄为验证骨架、在规范发现与事实归类环节显式容纳类比与归纳的自建法律推理本体。未导入任何现成法律本体文件、命名空间或类层级。"@zh ;
+    owl:versionInfo "0.1.0-bootstrap" ;
+    law:本体版本 "0.1.0-bootstrap" ;
+    law:自建声明 "全部类与属性自建；未导入外部法律本体"@zh ;
+    law:锚定计划书条款 "§一.1, §4.1" ;
+    law:名称空间 "https://ontology.law-cn.internal/mcl#" .
+
+law:本体版本 a owl:DatatypeProperty ;
+    rdfs:label "本体版本"@zh ;
+    rdfs:range xsd:string .
+
+law:自建声明 a owl:DatatypeProperty ;
+    rdfs:label "自建声明"@zh ;
+    rdfs:range xsd:string .
+
+law:名称空间 a owl:DatatypeProperty ;
+    rdfs:label "名称空间"@zh ;
+    rdfs:range xsd:string .
+
+# ---------------------------------------------------------------------------
+# 轴二：层（建模构件的归属）。与轴一「模块」正交，见 ADR-0006。
+# 层是个体：构件用 law:所属层 指向它们。
+# ---------------------------------------------------------------------------
+
+law:层 a owl:Class ;
+    rdfs:label "层"@zh ;
+    rdfs:comment "分层架构的层位。与五模块正交：模块管法律概念分类，层管建模构件归属。"@zh .
+
+law:规范层 a law:层 ;
+    rdfs:label "规范层"@zh ;
+    rdfs:comment "法律规则 = 构成要件 + 法律效果 + 规范类型；含道义模态、文本版本、废止条件。"@zh ;
+    law:锚定计划书条款 "§4.2" .
+
+law:事实层 a law:层 ;
+    rdfs:label "事实层"@zh ;
+    rdfs:comment "生活事实 → 法律因子（论证功能标签，类比操作平面）→ 关键事实（要件事实）。"@zh ;
+    law:锚定计划书条款 "§4.2" .
+
+law:案例层 a law:层 ;
+    rdfs:label "案例层"@zh ;
+    rdfs:comment "因子画像（含极性）+ 要件判定记录 + 深层关联（争点、原则、政策）。"@zh ;
+    law:锚定计划书条款 "§4.2" .
+
+law:适用层 a law:层 ;
+    rdfs:label "适用层"@zh ;
+    rdfs:comment "法律适用节点，携带推理模式标签与判断状态。"@zh ;
+    law:锚定计划书条款 "§4.2, §4.3" .
+
+law:元层 a law:层 ;
+    rdfs:label "元层"@zh ;
+    rdfs:comment "元模型自指层：层、状态值等建模装置本身所属的层位。"@zh ;
+    law:锚定计划书条款 "§4.1" .
+
+# 层互不相同（个体层面）。用 AllDifferent 而非 AllDisjointClasses。
+[] a owl:AllDifferent ;
+    owl:members ( law:规范层 law:事实层 law:案例层 law:适用层 law:元层 ) .
+
+# ---------------------------------------------------------------------------
+# 构件根类：所有建模构件的上位类。溯源状态在此声明并由子类继承。
+# ---------------------------------------------------------------------------
+
+law:所属层 a owl:ObjectProperty ;
+    rdfs:label "所属层"@zh ;
+    rdfs:range law:层 ;
+    rdfs:comment "构件类的层归属，恰好一个（E-LAYER-01）。构件不受五模块归属约束。"@zh .
+
+law:构件 a owl:Class ;
+    rdfs:label "构件"@zh ;
+    rdfs:comment "建模构件（推理结构的零件），不是法律概念。构件不受「必须挂五模块」约束，只受「必须有所属层」约束。"@zh ;
+    law:溯源状态 law:溯源-自建设计 ;
+    law:非法律结论 true ;
+    law:锚定计划书条款 "§4.2" .
+
+law:法律概念 a owl:Class ;
+    rdfs:label "法律概念"@zh ;
+    rdfs:comment "法律概念的根类。任何法律概念类必须且只能有一个五模块类作为直接上位类（ADR-0006 轴一）。无模块归属者标「悬浮」，禁止入库。"@zh ;
+    law:锚定计划书条款 "§5.2, §阶段2" .
+
+# ---------------------------------------------------------------------------
+# 通用元数据属性
+# ---------------------------------------------------------------------------
+
+law:中文标识符 a owl:DatatypeProperty ;
+    rdfs:label "中文标识符"@zh ;
+    rdfs:range xsd:string ;
+    rdfs:comment "与 IRI 局部名一致的中文标识符。发布后只允许废弃+新增，不允许重命名（ADR-0005）。"@zh .
+
+law:英文注释 a owl:DatatypeProperty ;
+    rdfs:label "英文注释"@zh ;
+    rdfs:range xsd:string ;
+    rdfs:comment "可选。仅供外部工具与跨语言检索，不得作为检索主键或标识符来源。"@zh .
+
+law:锚定计划书条款 a owl:DatatypeProperty ;
+    rdfs:label "锚定计划书条款"@zh ;
+    rdfs:range xsd:string ;
+    rdfs:comment "元设计断言必须锚定计划书条款号，以满足 §5.2 门禁 1 的锚定强制。"@zh .
+
+law:非法律结论 a owl:DatatypeProperty ;
+    rdfs:label "非法律结论"@zh ;
+    rdfs:range xsd:boolean ;
+    rdfs:comment "true 表示该断言为元设计/结构断言，不含法律实质结论，可豁免判断状态（ADR-0007 §2.2）。"@zh .
+
+law:演练标记 a owl:DatatypeProperty ;
+    rdfs:label "演练标记"@zh ;
+    rdfs:range xsd:boolean ;
+    rdfs:comment "true 表示该节点为结构演练样本，内容为占位，不得作为法律依据引用。"@zh .
+
+# ---------------------------------------------------------------------------
+# 溯源登记（ontology/provenance/ 使用的词汇）
+# ---------------------------------------------------------------------------
+
+law:溯源登记 a owl:Class ;
+    rdfs:label "溯源登记"@zh ;
+    rdfs:comment "对一批事实源文件（如某版本的 tbox）的溯源汇总，含指纹与逐文件哈希。"@zh .
+
+law:溯源文件项 a owl:Class ;
+    rdfs:label "溯源文件项"@zh ;
+    rdfs:comment "溯源登记中的单文件条目。"@zh .
+
+law:指纹 a owl:DatatypeProperty ;
+    rdfs:label "指纹"@zh ;
+    rdfs:range xsd:string ;
+    rdfs:comment "对 ontology/tbox/*.ttl 按文件名排序后拼接取 SHA-256。用于检出元设计漂移（CQ-M05）。"@zh .
+
+law:覆盖范围 a owl:DatatypeProperty ;
+    rdfs:label "覆盖范围"@zh ;
+    rdfs:range xsd:string .
+
+law:文件 a owl:ObjectProperty ;
+    rdfs:label "文件"@zh ;
+    rdfs:domain law:溯源登记 ;
+    rdfs:range law:溯源文件项 .
+
+law:文件名 a owl:DatatypeProperty ;
+    rdfs:label "文件名"@zh ;
+    rdfs:domain law:溯源文件项 ;
+    rdfs:range xsd:string .
+
+law:文件指纹 a owl:DatatypeProperty ;
+    rdfs:label "文件指纹"@zh ;
+    rdfs:domain law:溯源文件项 ;
+    rdfs:range xsd:string .
+
+law:行数 a owl:DatatypeProperty ;
+    rdfs:label "行数"@zh ;
+    rdfs:domain law:溯源文件项 ;
+    rdfs:range xsd:integer .

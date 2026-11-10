@@ -1,0 +1,178 @@
+{
+  "manifest_version": "0.1.0",
+  "generated_at": "2026-11-10T22:00:50",
+  "source": {
+    "tbox_fingerprint": "6c0bc9d1de2172e96bae80900c9fee8adb3824cff7a099b397a36c0d640d491b",
+    "tbox_files": [
+      "00-namespace.ttl",
+      "10-module.ttl",
+      "20-norm.ttl",
+      "30-fact.ttl",
+      "40-case.ttl",
+      "50-application.ttl",
+      "60-states.ttl"
+    ],
+    "abox_instances": 0
+  },
+  "gate_rules": {
+    "answer": "可作确定答案",
+    "candidate": "可召回，答案须显式标注「候选」",
+    "hint": "不得作答案，仅作「待裁定事项」提示",
+    "none": "不返回",
+    "meta": "可返回，须标注「元设计/非法律结论」"
+  },
+  "metadata_filters": [
+    "type",
+    "phase",
+    "judgment_status",
+    "module",
+    "layer",
+    "anchored_questions",
+    "related",
+    "cert_status"
+  ],
+  "stats": {
+    "blocks": 8,
+    "by_type": {
+      "decision": 8
+    },
+    "by_gate": {
+      "answer": 0,
+      "candidate": 0,
+      "hint": 0,
+      "none": 0,
+      "meta": 8
+    }
+  },
+  "blocks": [
+    {
+      "id": "ADR-0001",
+      "type": "decision",
+      "label": "ADR-0001 · 项目初始化与目录基线",
+      "judgment_status": null,
+      "provenance_status": "accepted",
+      "phase": "P0",
+      "summary": "建立事实源唯一的分层目录基线，并对计划书 §三 目录树的三处缺失/歧义作出补正",
+      "related": [
+        "ADR-0008",
+        "RSK-0003",
+        "ESC-0001",
+        "ESC-0002"
+      ],
+      "retrievable_as": "meta"
+    },
+    {
+      "id": "ADR-0002",
+      "type": "decision",
+      "label": "ADR-0002 · 道义模态建模",
+      "judgment_status": null,
+      "provenance_status": "accepted",
+      "phase": "P1",
+      "summary": "道义模态建为规范模块内的独立类（义务/许可/禁止），各自携带条件、对象、期限槽位，放弃作为规则属性值",
+      "related": [
+        "ADR-0006",
+        "ADR-0007",
+        "RSK-0001"
+      ],
+      "retrievable_as": "meta"
+    },
+    {
+      "id": "ADR-0003",
+      "type": "decision",
+      "label": "ADR-0003 · 时间性建模",
+      "judgment_status": null,
+      "provenance_status": "accepted",
+      "phase": "P1",
+      "summary": "时间性采「抽象规范—文本版本」双层，版本携带公布/生效/失效日期，规则挂版本而非挂单一日期",
+      "related": [
+        "ADR-0004",
+        "ADR-0006",
+        "RSK-0001"
+      ],
+      "retrievable_as": "meta"
+    },
+    {
+      "id": "ADR-0004",
+      "type": "decision",
+      "label": "ADR-0004 · 可废止性建模",
+      "judgment_status": null,
+      "provenance_status": "accepted",
+      "phase": "P1",
+      "summary": "可废止性建为规则层独立「废止条件」槽位，废止关系携带时间与优先规则，放弃规则内部「例外」属性",
+      "related": [
+        "ADR-0002",
+        "ADR-0003",
+        "RSK-0004"
+      ],
+      "retrievable_as": "meta"
+    },
+    {
+      "id": "ADR-0005",
+      "type": "decision",
+      "label": "ADR-0005 · 概念标识符语言",
+      "judgment_status": null,
+      "provenance_status": "accepted",
+      "phase": "P2",
+      "summary": "概念标识符采中文标识符 + 中文标签 + 可选英文注释；放弃英文标识符，理由为标识符层面避免引入域外法律框架",
+      "related": [
+        "ADR-0006",
+        "RSK-0005",
+        "RSK-0004"
+      ],
+      "retrievable_as": "meta"
+    },
+    {
+      "id": "ADR-0006",
+      "type": "decision",
+      "label": "ADR-0006 · 五模块 × 四层元设计",
+      "judgment_status": null,
+      "provenance_status": "accepted",
+      "phase": "P1",
+      "summary": "五模块（主体/行为/规范/关系/效果）与四层（规范/事实/案例/适用）作为两条正交轴：模块管概念分类，层管建模构件归属",
+      "related": [
+        "ADR-0001",
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0004",
+        "ADR-0005",
+        "ADR-0007",
+        "RSK-0001"
+      ],
+      "retrievable_as": "meta"
+    },
+    {
+      "id": "ADR-0007",
+      "type": "decision",
+      "label": "ADR-0007 · 状态轴拆分与元设计断言的溯源处理",
+      "judgment_status": null,
+      "provenance_status": "accepted",
+      "phase": "P1",
+      "summary": "把计划书混用的状态概念拆为三轴：溯源状态/判断状态/证成状态，并为元设计断言设立「非法律结论」豁免通道",
+      "related": [
+        "ADR-0006",
+        "ADR-0008",
+        "ESC-0002",
+        "ESC-0003",
+        "RSK-0001"
+      ],
+      "retrievable_as": "meta"
+    },
+    {
+      "id": "ADR-0008",
+      "type": "decision",
+      "label": "ADR-0008 · 工具链与投影生成管线",
+      "judgment_status": null,
+      "provenance_status": "accepted",
+      "phase": "P1",
+      "summary": "事实源用 Turtle 分文件承载，校验用 pyshacl + 自研结构检查器，Wiki/RAG manifest/可视化三投影由 tools/sync 与 tools/vis 单向生成",
+      "related": [
+        "ADR-0001",
+        "ADR-0006",
+        "ADR-0007",
+        "RSK-0005",
+        "RSK-0004"
+      ],
+      "retrievable_as": "meta"
+    }
+  ]
+}

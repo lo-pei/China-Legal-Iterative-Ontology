@@ -1,0 +1,45 @@
+# 10-module.ttl
+# 轴一：五模块（主体 / 行为 / 规范 / 关系 / 效果），互斥且穷尽于法律概念分类。
+# 见 ADR-0006。本文件只定义模块分区，不定义任何具体法律概念（阶段 2 由权威材料驱动）。
+
+@prefix law:  <https://ontology.law-cn.internal/mcl#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+law:模块 a owl:Class ;
+    rdfs:label "模块"@zh ;
+    rdfs:comment "按推理链功能位划分的法律概念分区。一个法律概念必须且只能归属一个模块。"@zh ;
+    law:锚定计划书条款 "§4.1" .
+
+law:主体模块 a owl:Class ;
+    rdfs:subClassOf law:模块 ;
+    rdfs:label "主体模块"@zh ;
+    rdfs:comment "民事主体及其资格、能力、代理与代表等结构。承载「谁」的问题。"@zh ;
+    law:锚定计划书条款 "§4.1" .
+
+law:行为模块 a owl:Class ;
+    rdfs:subClassOf law:模块 ;
+    rdfs:label "行为模块"@zh ;
+    rdfs:comment "法律行为、意思表示、履行、违约、侵权等「做了什么」的结构。"@zh ;
+    law:锚定计划书条款 "§4.1" .
+
+law:规范模块 a owl:Class ;
+    rdfs:subClassOf law:模块 ;
+    rdfs:label "规范模块"@zh ;
+    rdfs:comment "规范的效力来源、类型、模态与解释支撑等「依据什么」的结构。"@zh ;
+    law:锚定计划书条款 "§4.1" .
+
+law:关系模块 a owl:Class ;
+    rdfs:subClassOf law:模块 ;
+    rdfs:label "关系模块"@zh ;
+    rdfs:comment "民事法律关系（合同、物权、侵权之债等）与由之派生的请求权、抗辩权。「谁对谁主张什么」的结构。"@zh ;
+    law:锚定计划书条款 "§4.1" .
+
+law:效果模块 a owl:Class ;
+    rdfs:subClassOf law:模块 ;
+    rdfs:label "效果模块"@zh ;
+    rdfs:comment "法律效果的类型与内容：给付、形成、确认、抗辩、责任等「发生什么」的结构。"@zh ;
+    law:锚定计划书条款 "§4.1" .
+
+[] a owl:AllDisjointClasses ;
+    owl:members ( law:主体模块 law:行为模块 law:规范模块 law:关系模块 law:效果模块 ) .
