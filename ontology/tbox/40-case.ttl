@@ -121,7 +121,7 @@ law:涉及政策 a owl:DatatypeProperty ;
     rdfs:range xsd:string ;
     rdfs:comment "交易安全、消费者保护等政策性考量。"@zh .
 
-law:标注版本 a owl:DatatypeProperty ;
+law:标注版本 a owl:AnnotationProperty ;
     rdfs:label "标注版本"@zh ;
     rdfs:range xsd:string ;
     rdfs:comment "标注版本号，与阶段 tag 对应（§5.2 门禁 5）。"@zh .

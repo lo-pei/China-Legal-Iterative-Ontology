@@ -1,0 +1,14 @@
+# EXPECT: E-TAX-01
+# 反例：子类关系成环。环使祖先闭包不可终止，任何依赖类链的检查都会失控。
+@prefix law:  <https://ontology.law-cn.internal/mcl#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+law:试环甲 a owl:Class ;
+    rdfs:subClassOf law:试环乙 ;
+    rdfs:label "试环甲"@zh .
+
+law:试环乙 a owl:Class ;
+    rdfs:subClassOf law:试环甲 ;
+    rdfs:label "试环乙"@zh .

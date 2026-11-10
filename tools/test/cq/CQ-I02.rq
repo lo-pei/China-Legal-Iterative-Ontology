@@ -1,0 +1,29 @@
+# CQ-I02 —— 候选规则与成文规则同构
+# 违规查询：返回缺少规则必填槽位的候选规则。期望 0 行。
+# 对应 PLAN/01 §2.2 验收判据：候选规则具备与规则相同的全部必填槽位。
+# 注：本查询不依赖 rdfs 推理，直接检查断言是否存在，故候选规则必须显式携带槽位。
+PREFIX law: <https://ontology.law-cn.internal/mcl#>
+
+SELECT ?候选规则 ?缺失槽位 WHERE {
+  ?候选规则 a law:候选规则 .
+  {
+    FILTER NOT EXISTS { ?候选规则 law:具有要件 ?a }
+    BIND("law:具有要件" AS ?缺失槽位)
+  } UNION {
+    FILTER NOT EXISTS { ?候选规则 law:具有效果 ?b }
+    BIND("law:具有效果" AS ?缺失槽位)
+  } UNION {
+    FILTER NOT EXISTS { ?候选规则 law:归属规范类型 ?c }
+    BIND("law:归属规范类型" AS ?缺失槽位)
+  } UNION {
+    FILTER NOT EXISTS { ?候选规则 law:具有模态 ?d }
+    BIND("law:具有模态" AS ?缺失槽位)
+  } UNION {
+    FILTER NOT EXISTS { ?候选规则 law:隶属版本 ?e }
+    BIND("law:隶属版本" AS ?缺失槽位)
+  } UNION {
+    FILTER NOT EXISTS { ?候选规则 law:证成状态 ?f }
+    BIND("law:证成状态" AS ?缺失槽位)
+  }
+}
+ORDER BY ?候选规则 ?缺失槽位

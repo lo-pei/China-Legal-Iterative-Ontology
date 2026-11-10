@@ -1,0 +1,11 @@
+# CQ-M03 —— 双状态轴在不输出结论的前提下表达不确定性
+# 违规查询：返回同时具有「判断状态=已验证」与「溯源状态=自建设计」的节点。期望 0 行。
+# 对应 ADR-0007 §2.4 不变式 3（系统不得自证）。这是整个门禁的可信度底线。
+# 注：只查显式冲突。溯源状态经类继承的情形由 validate.py 的 check_status_gates 处理。
+PREFIX law: <https://ontology.law-cn.internal/mcl#>
+
+SELECT ?节点 WHERE {
+  ?节点 law:判断状态 law:状态-已验证 ;
+        law:溯源状态 law:溯源-自建设计 .
+}
+ORDER BY ?节点

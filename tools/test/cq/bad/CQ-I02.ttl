@@ -1,0 +1,14 @@
+# EXPECT: CQ-I02
+# 反例 CQ-I02：一个候选规则缺 law:具有模态，其余槽位齐全。
+# 用途：证明 CQ-I02 的查询能真的拦住「候选规则与成文规则不同构」。
+# 仅在 run_cq.py --selftest 下加载，不进入生产校验图，也不进入事实源。
+@prefix law: <https://ontology.law-cn.internal/mcl#> .
+
+law:反例-候选规则-缺模态 a law:候选规则 ;
+    law:具有要件 law:反例-要件-缺文本 ;
+    law:具有效果 law:效果-给付 ;
+    law:归属规范类型 law:类型-主要规范 ;
+    law:隶属版本 law:反例-版本-占位 ;
+    law:证成状态 law:证成-待检验 .
+
+law:反例-版本-占位 a law:规范文本版本 .

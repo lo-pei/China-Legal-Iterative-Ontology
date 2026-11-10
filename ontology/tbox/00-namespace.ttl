@@ -5,33 +5,62 @@
 #
 # 本体论约定：模块是「类」（概念靠 subClassOf 归类）；层、状态值是「个体」。
 # 这条区分是硬的：模块需要类层级与互斥声明，层与状态值只需可被引用。
+#
+# 属性类别约定（ADR-0013 §2.3）：
+#   owl:ObjectProperty     —— 值是个体，且该关系是法律/结构断言
+#   owl:DatatypeProperty   —— 值是字面量，且该字面量是实例的内容
+#   owl:AnnotationProperty —— 描述「这个建模产物由谁、依据什么、何时、处于何种状态」
+# 判据不是「值是不是字符串」，而是「这条三元组是不是关于世界的断言」。
 
-@prefix law:  <https://ontology.law-cn.internal/mcl#> .
-@prefix owl:  <http://www.w3.org/2002/07/owl#> .
-@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix law:     <https://ontology.law-cn.internal/mcl#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix vann:    <http://purl.org/vocab/vann/> .
 
 law:本体 a owl:Ontology ;
-    rdfs:label "中国民事法律推理本体（受控子领域）"@zh ;
-    rdfs:comment "以演绎涵摄为验证骨架、在规范发现与事实归类环节显式容纳类比与归纳的自建法律推理本体。未导入任何现成法律本体文件、命名空间或类层级。"@zh ;
-    owl:versionInfo "0.1.0-bootstrap" ;
-    law:本体版本 "0.1.0-bootstrap" ;
+    # --- 版本（ADR-0013 §2.1：版本 IRI 与术语 IRI 分离）---
+    owl:versionIRI <https://ontology.law-cn.internal/mcl/0.2.0> ;
+    owl:versionInfo "0.2.0-civil-code" ;
+    # --- 命名空间声明（供外部工具与前缀服务识别）---
+    vann:preferredNamespacePrefix "law" ;
+    vann:preferredNamespaceUri "https://ontology.law-cn.internal/mcl#" ;
+    # --- 标准元数据（dcterms）。license/creator/publisher 为发布前置项，见 ADR-0013 §5.3 ---
+    dcterms:title "中国民事法律推理本体（受控子领域）"@zh ;
+    dcterms:description "以演绎涵摄为验证骨架、在规范发现与事实归类环节显式容纳类比与归纳的自建法律推理本体。未导入任何现成法律本体文件、命名空间或类层级。"@zh ;
+    dcterms:created "2026-11-10"^^xsd:date ;
+    dcterms:modified "2026-11-10"^^xsd:date ;
+    dcterms:language "zh-CN" ;
+    # --- 以下三项为 0.1.0 起的自建字段。保留以兼容既有 ADR 与 PROV 引用；
+    #     新写入请用 owl:versionIRI / vann: / dcterms: 对应字段（ADR-0013 §2.2）。
+    law:本体版本 "0.2.0-civil-code" ;
+    law:概念层版本 "0.2.0-civil-code" ;
     law:自建声明 "全部类与属性自建；未导入外部法律本体"@zh ;
     law:锚定计划书条款 "§一.1, §4.1" ;
-    law:名称空间 "https://ontology.law-cn.internal/mcl#" .
+    law:名称空间 "https://ontology.law-cn.internal/mcl#" ;
+    rdfs:label "中国民事法律推理本体（受控子领域）"@zh ;
+    rdfs:comment "以演绎涵摄为验证骨架、在规范发现与事实归类环节显式容纳类比与归纳的自建法律推理本体。未导入任何现成法律本体文件、命名空间或类层级。"@zh .
 
-law:本体版本 a owl:DatatypeProperty ;
+# ---------------------------------------------------------------------------
+# 本体头字段（保留兼容，新写入不再使用）
+# ---------------------------------------------------------------------------
+
+law:本体版本 a owl:AnnotationProperty ;
     rdfs:label "本体版本"@zh ;
-    rdfs:range xsd:string .
+    rdfs:range xsd:string ;
+    rdfs:comment "旧版版本字段。新写入请用 owl:versionInfo / owl:versionIRI（ADR-0013 §2.1）。有意省略 domain：仅用于本体头。"@zh .
 
-law:自建声明 a owl:DatatypeProperty ;
+law:自建声明 a owl:AnnotationProperty ;
     rdfs:label "自建声明"@zh ;
-    rdfs:range xsd:string .
+    rdfs:range xsd:string ;
+    rdfs:comment "声明未导入外部法律本体。属合规声明，非法律结论。有意省略 domain：仅用于本体头。"@zh .
 
-law:名称空间 a owl:DatatypeProperty ;
+law:名称空间 a owl:AnnotationProperty ;
     rdfs:label "名称空间"@zh ;
-    rdfs:range xsd:string .
+    rdfs:range xsd:string ;
+    rdfs:comment "旧版命名空间字段。新写入请用 vann:preferredNamespaceUri。有意省略 domain：仅用于本体头。"@zh .
 
 # ---------------------------------------------------------------------------
 # 轴二：层（建模构件的归属）。与轴一「模块」正交，见 ADR-0006。
@@ -78,7 +107,7 @@ law:元层 a law:层 ;
 law:所属层 a owl:ObjectProperty ;
     rdfs:label "所属层"@zh ;
     rdfs:range law:层 ;
-    rdfs:comment "构件类的层归属，恰好一个（E-LAYER-01）。构件不受五模块归属约束。"@zh .
+    rdfs:comment "构件类的层归属，恰好一个（E-LAYER-01）。构件不受五模块归属约束。有意省略 domain：被 law:构件 的多个不相交子类使用，声明单一 domain 会让 rdfs 推理把所有使用者静默归为构件，掩盖误用。"@zh .
 
 law:构件 a owl:Class ;
     rdfs:label "构件"@zh ;
@@ -93,36 +122,42 @@ law:法律概念 a owl:Class ;
     law:锚定计划书条款 "§5.2, §阶段2" .
 
 # ---------------------------------------------------------------------------
-# 通用元数据属性
+# 通用元数据属性（全部为注释属性：它们描述建模产物，不描述法律事实）
 # ---------------------------------------------------------------------------
 
-law:中文标识符 a owl:DatatypeProperty ;
+law:中文标识符 a owl:AnnotationProperty ;
     rdfs:label "中文标识符"@zh ;
     rdfs:range xsd:string ;
     rdfs:comment "与 IRI 局部名一致的中文标识符。发布后只允许废弃+新增，不允许重命名（ADR-0005）。"@zh .
 
-law:英文注释 a owl:DatatypeProperty ;
+law:英文注释 a owl:AnnotationProperty ;
     rdfs:label "英文注释"@zh ;
     rdfs:range xsd:string ;
-    rdfs:comment "可选。仅供外部工具与跨语言检索，不得作为检索主键或标识符来源。"@zh .
+    rdfs:comment "可选。仅供外部工具与跨语言检索，不得作为检索主键或标识符来源。机器可读的英文 token 请用 skos:notation。"@zh .
 
-law:锚定计划书条款 a owl:DatatypeProperty ;
+law:锚定计划书条款 a owl:AnnotationProperty ;
     rdfs:label "锚定计划书条款"@zh ;
     rdfs:range xsd:string ;
-    rdfs:comment "元设计断言必须锚定计划书条款号，以满足 §5.2 门禁 1 的锚定强制。"@zh .
+    rdfs:comment "元设计断言必须锚定计划书条款号，以满足 §5.2 门禁 1 的锚定强制。设计溯源，非法律溯源。"@zh .
 
-law:非法律结论 a owl:DatatypeProperty ;
+law:非法律结论 a owl:AnnotationProperty ;
     rdfs:label "非法律结论"@zh ;
     rdfs:range xsd:boolean ;
     rdfs:comment "true 表示该断言为元设计/结构断言，不含法律实质结论，可豁免判断状态（ADR-0007 §2.2）。"@zh .
 
-law:演练标记 a owl:DatatypeProperty ;
+law:演练标记 a owl:AnnotationProperty ;
     rdfs:label "演练标记"@zh ;
     rdfs:range xsd:boolean ;
     rdfs:comment "true 表示该节点为结构演练样本，内容为占位，不得作为法律依据引用。"@zh .
 
+law:有意省略domain a owl:AnnotationProperty ;
+    rdfs:label "有意省略domain"@zh ;
+    rdfs:range xsd:boolean ;
+    rdfs:comment "true 表示该属性故意不声明 rdfs:domain，使 W-TERM-05 不再报出（ADR-0013 §2.5）。用于区分「有意省略」与「疏忽遗漏」。"@zh .
+
 # ---------------------------------------------------------------------------
 # 溯源登记（ontology/provenance/ 使用的词汇）
+# 这些字段描述的是「一批文件的摘要」，属文件级元数据，全部为注释属性。
 # ---------------------------------------------------------------------------
 
 law:溯源登记 a owl:Class ;
@@ -133,31 +168,33 @@ law:溯源文件项 a owl:Class ;
     rdfs:label "溯源文件项"@zh ;
     rdfs:comment "溯源登记中的单文件条目。"@zh .
 
-law:指纹 a owl:DatatypeProperty ;
+law:指纹 a owl:AnnotationProperty ;
     rdfs:label "指纹"@zh ;
     rdfs:range xsd:string ;
     rdfs:comment "对 ontology/tbox/*.ttl 按文件名排序后拼接取 SHA-256。用于检出元设计漂移（CQ-M05）。"@zh .
 
-law:覆盖范围 a owl:DatatypeProperty ;
+law:覆盖范围 a owl:AnnotationProperty ;
     rdfs:label "覆盖范围"@zh ;
-    rdfs:range xsd:string .
+    rdfs:range xsd:string ;
+    rdfs:comment "该指纹覆盖的文件号段（如 00-60 为元模型，7* 为概念层）。"@zh .
 
 law:文件 a owl:ObjectProperty ;
     rdfs:label "文件"@zh ;
     rdfs:domain law:溯源登记 ;
-    rdfs:range law:溯源文件项 .
+    rdfs:range law:溯源文件项 ;
+    rdfs:comment "溯源登记到单文件条目的结构关系。"@zh .
 
-law:文件名 a owl:DatatypeProperty ;
+law:文件名 a owl:AnnotationProperty ;
     rdfs:label "文件名"@zh ;
     rdfs:domain law:溯源文件项 ;
     rdfs:range xsd:string .
 
-law:文件指纹 a owl:DatatypeProperty ;
+law:文件指纹 a owl:AnnotationProperty ;
     rdfs:label "文件指纹"@zh ;
     rdfs:domain law:溯源文件项 ;
     rdfs:range xsd:string .
 
-law:行数 a owl:DatatypeProperty ;
+law:行数 a owl:AnnotationProperty ;
     rdfs:label "行数"@zh ;
     rdfs:domain law:溯源文件项 ;
     rdfs:range xsd:integer .

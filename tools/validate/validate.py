@@ -21,6 +21,7 @@ SHACL（tools/validate/shapes.ttl）负责单节点局部约束：必填、基�
 ----
     python tools/validate/validate.py                  # 校验事实源（不含演练样本）
     python tools/validate/validate.py --include-fixtures   # 含结构演练样本
+    python tools/validate/validate.py --negative       # 反例检出测试（验证校验器有效）
     python tools/validate/validate.py --json           # 机器可读输出
 
 退出码：0 = 无错误（可有警告）；1 = 存在 E 级问题。
@@ -210,8 +211,16 @@ def check_taxonomy(g: Graph, report: Report):
         if L["法律概念"] in ancestors(g, c):
             concept_closure.append(c)
     for c in concept_closure:
+        # 模块类自身是分区节点，不是待归类的法律概念（ADR-0012 §2.7）
+        if c in module_classes or c == L["模块"]:
+            continue
         parents = [p for p in g.objects(c, RDFS.subClassOf) if p in module_classes]
         if len(parents) == 0:
+            # 模块归属已升级的概念不按「悬浮」处理：待裁定 + open ESC 是合法状态（ADR-0012 §5）。
+            # 否则「不能自圆其说地归模块」会被迫伪造归属，正是 ESC 机制要避免的事。
+            if (one(g.objects(c, L["判断状态"])) == L["状态-待裁定"]
+                    and one(g.objects(c, L["受裁定于"]))):
+                continue
             report.err("E-MOD-01", label_of(g, c), "法律概念无五模块归属（悬浮，禁止入库，§5.2 门禁 1）")
         elif len(parents) > 1:
             report.err("E-TAX-02", label_of(g, c),
@@ -554,6 +563,9 @@ def check_cq(g: Graph, report: Report):
     for c in g.subjects(RDF.type, OWL.Class):
         if L["法律概念"] not in ancestors(g, c) or c == L["法律概念"]:
             continue
+        # 模块类自身是分区节点，不需要锚定能力问题（ADR-0012 §2.7）
+        if str(c).replace(NS, "") in MODULE_NAMES or c == L["模块"]:
+            continue
         anchors = [str(v) for v in g.objects(c, L["锚定能力问题"])]
         if not anchors:
             report.err("E-ANC-01", label_of(g, c), "法律概念未锚定能力问题（悬浮，§5.2 门禁 1）")
@@ -577,11 +589,84 @@ def check_identifiers(g: Graph, report: Report):
             seen[local] = label_of(g, c)
 
 
+# ---------------------------------------------------------------------------
+# T 术语卫生（ADR-0013 §2.5）
+#
+# 与 OOPS! 的关系：取其可可靠判定的子集（P20 误用注释、P32 同标签、P34/P35 未声明类型、
+# P11 缺 domain/range），不取其依赖 DL 推理的项（P07/P14/P15/P17/P18）——无推理机时强做只会误报，
+# 而误报会训练出「忽略警告」的习惯，比不检查更坏。
+# ---------------------------------------------------------------------------
+
+SELF_OMIT_MARK = "有意省略"
+
+
+def check_term_hygiene(g: Graph, report: Report) -> dict:
+    classes = set(g.subjects(RDF.type, OWL.Class)) | set(g.subjects(RDF.type, RDFS.Class))
+    obj_p = set(g.subjects(RDF.type, OWL.ObjectProperty))
+    dat_p = set(g.subjects(RDF.type, OWL.DatatypeProperty))
+    ann_p = set(g.subjects(RDF.type, OWL.AnnotationProperty))
+    props = obj_p | dat_p | ann_p
+
+    # E-TERM-01 属性类别冲突：同一 IRI 落在两个互斥的属性类别里
+    for p in sorted(obj_p & dat_p, key=str):
+        report.err("E-TERM-01", label_of(g, p),
+                   "同时声明为 ObjectProperty 与 DatatypeProperty，SHACL 与推理行为不确定")
+    for p in sorted((obj_p | dat_p) & ann_p, key=str):
+        report.err("E-TERM-01", label_of(g, p),
+                   "同时声明为注释属性与对象/数据属性。注释不参与语义，混用会使元数据被当作断言（ADR-0013 §2.3）")
+
+    # E-TERM-02 类与属性同 IRI：OWL 2 DL 的 punning 在无推理机时静默通过，后果迟发
+    for x in sorted(classes & props, key=str):
+        report.err("E-TERM-02", label_of(g, x), "同一 IRI 既声明为类又声明为属性（punning 冲突）")
+
+    # W-TERM-03 缺标签：label 是唯一稳定的人类可读标识
+    for x in sorted(classes | props, key=str):
+        if not list(g.objects(x, RDFS.label)):
+            report.warn("W-TERM-03", x, "缺少 rdfs:label，人类与工具都无法稳定指称")
+
+    # W-TERM-04 元模型类缺注释。概念层不适用：其定义来自投递材料，覆盖率见 stats（ADR-0012 §2.1）
+    concept_closure = {c for c in classes if L["法律概念"] in ancestors(g, c)}
+    for c in sorted(classes - concept_closure, key=str):
+        if not list(g.objects(c, RDFS.comment)):
+            report.warn("W-TERM-04", label_of(g, c),
+                        "元模型类缺少 rdfs:comment。元模型是自建设计，无外部材料可代偿")
+
+    # W-TERM-05 既无 domain 也无 range：须显式声明为有意省略，否则视为遗漏
+    for p in sorted(props, key=str):
+        if list(g.objects(p, RDFS.domain)) or list(g.objects(p, RDFS.range)):
+            continue
+        cmts = " ".join(str(x) for x in g.objects(p, RDFS.comment))
+        if SELF_OMIT_MARK in cmts:
+            continue
+        report.warn("W-TERM-05", label_of(g, p),
+                    "既无 rdfs:domain 也无 rdfs:range；若为有意省略，请在 rdfs:comment 中注明「有意省略」")
+
+    # E-TERM-06 上位概念与 subClassOf 不一致（本项目双记录的代价，须有机器检查兜住）
+    for c in sorted(classes, key=str):
+        ups = set(g.objects(c, L["上位概念"]))
+        if not ups:
+            continue
+        subs = set(g.objects(c, RDFS.subClassOf))
+        for u in ups - subs:
+            report.err("E-TERM-06", label_of(g, c),
+                       f"law:上位概念 声明 {label_of(g, u)}，但缺少对应的 rdfs:subClassOf")
+
+    # 概念定义覆盖率：不作为警告，作为可观测指标（对齐 CQ-M04 的度量口径）
+    defined = [c for c in concept_closure
+               if list(g.objects(c, RDFS.comment)) or list(g.objects(c, L["定义"]))]
+    ratio = len(defined) / len(concept_closure) if concept_closure else 1.0
+    return {"concepts": len(concept_closure), "defined": len(defined), "ratio": ratio}
+
+
 def check_tbox_drift(g: Graph, report: Report):
     h = hashlib.sha256()
+    concept = hashlib.sha256()
     for f in sorted((ROOT / "ontology" / "tbox").glob("*.ttl")):
         h.update(f.read_bytes())
+        if f.name.startswith("7"):
+            concept.update(f.read_bytes())
     fingerprint = h.hexdigest()
+    concept_fingerprint = concept.hexdigest()
     prov = sorted((ROOT / "ontology" / "provenance").glob("*.ttl"))
     recorded = None
     for p in prov:
@@ -597,7 +682,7 @@ def check_tbox_drift(g: Graph, report: Report):
         report.warn("W-TBOX-DRIFT", "ontology/tbox",
                     f"元设计指纹与登记值不一致（登记 {recorded[:12]}…，实测 {fingerprint[:12]}…）。"
                     "若为结构性修改，须有 CON/ADR 并在 META 中报告（§阶段5「元设计稳定性目标为零」）")
-    return fingerprint, recorded
+    return fingerprint, recorded, concept_fingerprint
 
 
 # ---------------------------------------------------------------------------
@@ -639,6 +724,110 @@ def run_shacl(g: Graph, report: Report):
 
 
 # ---------------------------------------------------------------------------
+# N 反例检出测试（ADR-0013 §2.6）
+#
+# 目的：证明校验器真的拦得住错误，而不是只对干净数据不吭声。
+# 一个从未被喂过错误数据的校验器，其「已实现」只是「有代码」的同义词。
+#
+# 边界（必须遵守）：本测试测的是校验器对**已知构造错误**的检出能力，
+# 不是标注者错误率，不能替代 SCHEMA §8 门禁 3 的抽样复核。
+# ---------------------------------------------------------------------------
+
+NEG_DIR = ROOT / "tools" / "validate" / "fixtures" / "negative"
+
+# 反例图 = 真实 tbox 基础图 + 一条构造错误。
+# 不合并 tbox 会让模块闭包、sh:class 判定、状态词表全部失效，
+# 测出来的是「孤立片段能否被识别」，不是「本体被误改后能否被发现」。
+def _base_graph() -> Graph:
+    base = Graph()
+    for f in sorted((ROOT / "ontology" / "tbox").glob("*.ttl")):
+        try:
+            base.parse(f, format="turtle")
+        except Exception:  # noqa: BLE001
+            pass
+    return base
+
+
+# 只跑图相关检查：负向样本不含记录文件，跑记录检查只会得到无意义的 E-REC-01
+def _graph_checks(g: Graph, esc_index: dict | None = None, rsk_index: dict | None = None) -> Report:
+    rep = Report()
+    check_taxonomy(g, rep)
+    check_norms(g, rep)
+    check_fact_chain(g, rep)
+    check_application(g, rep)
+    check_status_gates(g, rep, esc_index or {}, rsk_index or {})
+    check_term_hygiene(g, rep)
+    run_shacl(g, rep)
+    return rep
+
+
+def run_negative_checks() -> int:
+    if not NEG_DIR.exists():
+        print(f"反例目录不存在：{NEG_DIR.relative_to(ROOT)}")
+        return 1
+    files = sorted(NEG_DIR.glob("*.ttl"))
+    if not files:
+        print("反例目录为空：至少需要一个样本才能证明校验器会拦截")
+        return 1
+
+    base = _base_graph()
+    base_n = len(base)
+
+    # 反例图必须带真实的 ESC/RSK 索引，否则基础图里已有的待裁定节点会被误报 E-ESC-01，
+    # 使每个样本都背一条假错误——假错误会让人习惯性忽略报告。
+    recs, _ = check_records(Report())
+    esc_index = {k: v["fm"] for k, v in recs.items() if k.startswith("ESC-")}
+    rsk_index = {k: v["fm"] for k, v in recs.items() if k.startswith("RSK-")}
+
+    print("=" * 78)
+    print("反例检出测试 · 校验器有效性证据")
+    print("=" * 78)
+    print(f"基础图：ontology/tbox {base_n} 三元组；各样本在其上叠加一条构造错误")
+    print("-" * 78)
+    hit, rows = 0, []
+    for f in files:
+        head = f.read_text(encoding="utf-8").split("\n")[:4]
+        expect = None
+        for line in head:
+            m = re.search(r"EXPECT:\s*([EW]-[A-Z0-9]+(?:-[A-Z0-9]+)*)", line)
+            if m:
+                expect = m.group(1)
+                break
+        if expect is None:
+            rows.append((f.name, "?", "样本未写 EXPECT 注释", False))
+            continue
+        g = Graph()
+        for triple in base:
+            g.add(triple)
+        try:
+            g.parse(f, format="turtle")
+        except Exception as exc:  # noqa: BLE001
+            rows.append((f.name, expect, f"样本自身解析失败：{exc}", False))
+            continue
+        rep = _graph_checks(g, esc_index, rsk_index)
+        codes = {i.code for i in rep.items}
+        ok = expect in codes
+        extra = sorted(codes - {expect})
+        note = "已拦截" if ok else "未拦截"
+        if ok:
+            hit += 1
+            if extra:
+                note += f"（另报 {len(extra)} 项：{', '.join(extra[:3])}）"
+        else:
+            note += f"（实际报出：{', '.join(sorted(codes)) or '无'}）"
+        rows.append((f.name, expect, note, ok))
+
+    for name, expect, note, ok in rows:
+        print(f"  {'✓' if ok else '✗'} {name:42s} 预期 {expect:12s} {note}")
+    print("-" * 78)
+    total = len(rows)
+    print(f"检出率：{hit}/{total} = {hit / total:.0%}" if total else "无可执行样本")
+    if hit < total:
+        print("存在未检出的错误：校验器或形状有缺口，须先修实现，不得改小 EXPECT 迁就。")
+    return 0 if hit == total else 1
+
+
+# ---------------------------------------------------------------------------
 # 主流程
 # ---------------------------------------------------------------------------
 
@@ -647,7 +836,12 @@ def main() -> int:
     ap.add_argument("--include-fixtures", action="store_true", help="加载结构演练样本")
     ap.add_argument("--json", action="store_true", help="以 JSON 输出")
     ap.add_argument("--no-shacl", action="store_true", help="跳过 SHACL")
+    ap.add_argument("--negative", action="store_true",
+                    help="运行反例检出测试：验证校验器能拦住构造错误（不读取生产态图谱）")
     args = ap.parse_args()
+
+    if args.negative:
+        return run_negative_checks()
 
     report = Report()
     g = load_graph(args.include_fixtures, report)
@@ -663,7 +857,8 @@ def main() -> int:
     check_index(report, records, index_text)
     check_cq(g, report)
     check_identifiers(g, report)
-    fingerprint, recorded = check_tbox_drift(g, report)
+    hygiene = check_term_hygiene(g, report)
+    fingerprint, recorded, concept_fp = check_tbox_drift(g, report)
     if not args.no_shacl:
         run_shacl(g, report)
 
@@ -675,6 +870,10 @@ def main() -> int:
         "warnings": len(report.warnings),
         "tbox_fingerprint": fingerprint,
         "tbox_fingerprint_recorded": recorded,
+        "concept_fingerprint": concept_fp,
+        "concept_definition_ratio": round(hygiene["ratio"], 4),
+        "concept_defined": hygiene["defined"],
+        "concept_total": hygiene["concepts"],
     }
 
     if args.json:
@@ -686,6 +885,10 @@ def main() -> int:
         print("=" * 78)
         print(f"三元组 {stats['triples']}  |  类 {stats['classes']}  |  记录 {stats['records']}")
         print(f"tbox 指纹 {fingerprint[:16]}…  登记值 {(recorded or '未登记')[:16]}")
+        print(f"概念层指纹 {concept_fp[:16]}…")
+        print(f"概念定义覆盖率 {stats['concept_definition_ratio']:.1%}"
+              f"（{stats['concept_defined']}/{stats['concept_total']}，"
+              "无定义者来自投递材料缺项，非系统遗漏，见 ADR-0012 §2.1）")
         print("-" * 78)
         if not report.items:
             print("未发现问题。")

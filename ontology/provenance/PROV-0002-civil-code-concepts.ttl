@@ -1,0 +1,58 @@
+# PROV-0002-civil-code-concepts.ttl
+# 概念层首批（民法典概念骨架）的溯源登记，兼 0.2.0-civil-code 的全量指纹基线。
+#
+# 登记对象：负责人投递的两份整理件 + 概念层两个文件（70 / 71）。
+# 与 PROV-0001 的关系：PROV-0001 记录 0.1.0-bootstrap；本文件记录 0.2.0-civil-code。
+# 指纹口径见 ADR-0012 §2.6：按版本登记，区分全量指纹与概念层指纹。
+#
+# 注意（并发批次）：0.2.0 的元模型改动同时包含 ADR-0013 批次（00/30/40/60/70 号文件）。
+# 本文件的全量指纹是两批合并后的实测值，用于让校验器有基线可对；**逐文件登记由 ADR-0013 批次负责**。
+# 本文件只逐文件登记「投递件 → 概念层」这一段链条，避免替另一批做溯源声明。
+#
+# 强度声明：投递件是「整理件」而非规范原文，故本批概念全部只能支撑 判断状态=候选。
+# 本文件本身不构成法律结论（law:非法律结论 true）。
+
+@prefix law:  <https://ontology.law-cn.internal/mcl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+law:溯源-概念层批次 a law:溯源登记 ;
+    rdfs:label "概念层溯源登记 · 0.2.0-civil-code"@zh ;
+    law:覆盖范围 "概念层：70-concept-metadata.ttl、71-concepts-civil-code.ttl；投递件 2 份" ;
+    law:标注时间 "2026-11-10"^^xsd:date ;
+    law:指纹 "29d6ce8169b1eeb89bd2b9cfbd90106c56fd71a276a250d1ddcccf941f7456fe" ;
+    law:概念层指纹 "6751eec0ec21afde422c67d036f40f5fbc4a92ad86677727310c073938733d7a" ;
+    law:概念层版本 "0.2.0-civil-code" ;
+    law:溯源状态 law:溯源-投递材料 ;
+    law:投递件类型 "整理件" ;
+    law:非法律结论 true ;
+    law:标注者 "执行 Agent（概念层导入）" ;
+    law:锚定计划书条款 "§阶段2, §5.1" ;
+    rdfs:comment "445 个概念类由 tools/import/import_civil_code.py 从两份整理件生成。整理件含 166 条释义（其中 12 条为学理归纳，未逐条标注，见 RSK-0007）与 298 个主体名词。全部条目 判断状态=候选，无一条 已验证；6 条模块归属待裁定（ESC-0004）。导入同时修补元模型缺口：law:模块 增补 rdfs:subClassOf law:法律概念（ADR-0012 §2.7）。复核者为项目负责人，复核方式为 tools/import/module-assignment.tsv 逐行确认。**已知时效**：本文件的 law:指纹 是登记时刻的快照；ADR-0013 批次随后继续改写 00/30/40/60/70 号文件，故在其登记 PROV-0003 之前，校验器会持续报 W-TBOX-DRIFT——该警告指向的是「另一批改动尚未登记」，不是本批概念层出错。"@zh ;
+    law:文件 law:投递件-释义 ,
+        law:投递件-主体清单 ,
+        law:概念层文件-70 ,
+        law:概念层文件-71 .
+
+law:投递件-释义 a law:溯源文件项 ;
+    law:文件名 "民法典法律概念释义.md" ;
+    law:文件指纹 "5020997c080b4330a6ff58b5aa8d8cb08f60f6fa11e52d1777fc29db99e3d67c" ;
+    law:行数 357 ;
+    law:投递路径 "D:/work Buddy数据存储/2026-11-10-21-11-36/民法典法律概念释义.md" .
+
+law:投递件-主体清单 a law:溯源文件项 ;
+    law:文件名 "民法典主体名词清单.md" ;
+    law:文件指纹 "b68f81956a24248c53098cb4ee4bcf23c2ed77c8b9420114376025ecb9f2a29d" ;
+    law:行数 361 ;
+    law:投递路径 "D:/work Buddy数据存储/2026-11-10-21-11-36/民法典主体名词清单.md" .
+
+law:概念层文件-70 a law:溯源文件项 ;
+    law:文件名 "70-concept-metadata.ttl" ;
+    law:文件指纹 "03fb9b37b53715bd3fe7c34e2037c05ca2d88ff897787628a6787d37d99b4ba5" ;
+    law:行数 82 ;
+    rdfs:comment "本文件在 ADR-0013 批次中被追加属性类别声明（注释属性分流），指纹含该批次改动。"@zh .
+
+law:概念层文件-71 a law:溯源文件项 ;
+    law:文件名 "71-concepts-civil-code.ttl" ;
+    law:文件指纹 "62595cb1e5f1f79105f9c44406df4a89bf378ec2dd1d44682d5985bd7f3dcaed" ;
+    law:行数 6909 .

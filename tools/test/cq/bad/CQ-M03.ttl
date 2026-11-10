@@ -1,0 +1,9 @@
+# EXPECT: CQ-M03
+# 反例 CQ-M03：一个自建设计的节点被标为「已验证」——系统自证，ADR-0007 §2.4 不变式 3 禁止。
+# 用途：证明 CQ-M03 能真的拦住本项目的可信度底线被破。
+# 仅在 run_cq.py --selftest 下加载，不进入生产校验图，也不进入事实源。
+@prefix law: <https://ontology.law-cn.internal/mcl#> .
+
+law:反例-越权自证 a law:法律概念 ;
+    law:溯源状态 law:溯源-自建设计 ;
+    law:判断状态 law:状态-已验证 .

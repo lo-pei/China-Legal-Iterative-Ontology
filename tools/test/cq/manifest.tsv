@@ -1,0 +1,25 @@
+# CQ 执行清单（制表符分隔）
+# 列：CQ 编号 / 查询文件 / 期望 / 目标类（用于空转检测，- 表示不检测） / 目标能力 / 状态
+# 状态取值：implemented（已实现）| unimplemented（未实现，显式留痕，不得留空）
+# 「未实现」与「无样本」都不计入通过率——空转不是通过（ADR-0013 §2.7）。
+CQ	查询文件	期望	目标类	目标能力	状态
+CQ-D02	CQ-D02.rq	zero	law:构成要件	要件标注齐全且开放纹理为显式布尔	implemented
+CQ-I02	CQ-I02.rq	zero	law:候选规则	候选规则与成文规则同构	implemented
+CQ-M03	CQ-M03.rq	zero	-	无「已验证 + 自建设计」组合	implemented
+CQ-D01	CQ-D01.rq	zero	law:规则	请求权基础的规范定位与要件清单	unimplemented
+CQ-D03	CQ-D03.rq	zero	law:关键事实	事实归入要件并给出推导路径	unimplemented
+CQ-D04	CQ-D04.rq	zero	law:适用节点	每节点恰一个推理模式且至少一个依据	unimplemented
+CQ-D05	CQ-D05.rq	zero	law:规则	防御规范在链上可检索并指向被对抗要件	unimplemented
+CQ-D06	CQ-D06.rq	zero	law:废止条件	规范冲突以「冲突于 + 废止条件」双记录	unimplemented
+CQ-D07	CQ-D07.rq	zero	law:抽象规范	同一规范多版本区间不重叠	unimplemented
+CQ-A01	CQ-A01.rq	zero	law:涵摄前提	类比检索产出候选前提且有来源先例	unimplemented
+CQ-A02	CQ-A02.rq	zero	law:涵摄前提	候选前提标注来源且被演绎消费	unimplemented
+CQ-A03	CQ-A03.rq	zero	law:涵摄前提	类比论证结构可完整追溯	unimplemented
+CQ-I01	CQ-I01.rq	zero	law:候选规则	重复模式收敛为候选规则（来源≥2）	unimplemented
+CQ-I03	CQ-I03.rq	zero	law:候选规则	归纳检验识别反例并降级	unimplemented
+CQ-M01	CQ-M01.rq	zero	law:模块	五模块互斥且覆盖首批概念	unimplemented
+CQ-M02	CQ-M02.rq	zero	law:规则	真实规则无需新增顶层类即可承载	unimplemented
+CQ-M04	CQ-M04.rq	zero	law:规则	法律判断可回溯至权威材料或负责人裁定	unimplemented
+CQ-M05	CQ-M05.rq	zero	ontology/tbox	元设计在概念层建设期间稳定	unimplemented
+CQ-E01	CQ-E01.rq	zero	law:法律概念	无法裁定时停下并留 ESC	unimplemented
+CQ-E02	CQ-E02.rq	zero	-	升级队列可仅凭 INDEX 复现优先级	unimplemented

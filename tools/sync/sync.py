@@ -49,7 +49,8 @@ JS_LABEL = {
 }
 SRC_LABEL = {
     "溯源-权威材料": "权威材料", "溯源-负责人裁定": "负责人裁定",
-    "溯源-测试集结论": "测试集结论", "溯源-自建设计": "自建设计", "溯源-未溯源": "未溯源",
+    "溯源-测试集结论": "测试集结论", "溯源-自建设计": "自建设计",
+    "溯源-投递材料": "投递材料（整理件，非规范原文）", "溯源-未溯源": "未溯源",
 }
 
 
@@ -187,6 +188,9 @@ def build_blocks(g: Graph) -> list[dict]:
     for cls in g.subjects(RDF.type, OWL.Class):
         if L["法律概念"] not in class_parents(g, cls) or cls == L["法律概念"]:
             continue
+        # 模块类自身是分类轴的分区节点，不是概念条目（ADR-0012 §2.7）
+        if str(cls).replace(NS, "") in MODULE_COLOR or cls == L["模块"]:
+            continue
         js, src, non_legal = states(g, cls)
         mod = module_of(g, cls)
         blocks.append({
@@ -196,6 +200,7 @@ def build_blocks(g: Graph) -> list[dict]:
             "anchored_questions": [str(v) for v in g.objects(cls, L["锚定能力问题"])],
             "sources": [str(v) for v in g.objects(cls, L["来源文本"])],
             "related": [str(v) for v in g.objects(cls, L["上位概念"])],
+            "esc_ref": str(one(g.objects(cls, L["受裁定于"])) or ""),
             "definition": text_of(g, cls, "定义"),
             "retrievable_as": gate(js, src, non_legal),
         })
@@ -292,6 +297,8 @@ def render_page(block: dict) -> str:
     lines.append(f"- **判断状态**：{block.get('judgment_status') or '—（非法律判断/元设计）'}")
     lines.append(f"- **溯源状态**：{block.get('provenance_status') or '—'}")
     lines.append(f"- **检索门禁**：{GATE_TABLE.get(block.get('retrievable_as'), '—')}")
+    if block.get("esc_ref"):
+        lines.append(f"- **受裁定于**：`{block['esc_ref']}`（裁定前不得进入确定性层）")
     if block.get("cert_status"):
         lines.append(f"- **证成状态**：{block['cert_status']}")
     if block.get("doc_no"):
@@ -386,17 +393,45 @@ def write_page(path: Path, text: str, report: list[str]):
     path.write_text(text + f"\n<!-- content-hash: {h} -->\n", encoding="utf-8")
 
 
+DIRS = {"concept": "concepts", "rule": "rules", "case": "cases", "decision": "decisions"}
+
+
+def prune_stale(subdir: str, keep: set, report: list[str]) -> None:
+    """删除本工具生成、但本次不再生成的页（避免残留页成为第二真值源）。
+    只删首行为 generated-by 标记的文件；人工新建的文件不动。"""
+    d = ROOT / "wiki" / subdir
+    if not d.exists():
+        return
+    for p in d.glob("*.md"):
+        if p.name in keep:
+            continue
+        try:
+            head = p.read_text(encoding="utf-8")[:200]
+        except OSError:
+            continue
+        if "generated-by: tools/sync/sync.py" in head:
+            p.unlink()
+            report.append(f"删除失效投影页：{p.relative_to(ROOT).as_posix()}")
+
+
 def sync_wiki(g: Graph, blocks: list[dict]) -> list[str]:
     report: list[str] = []
+    keep = {"concept": set(), "rule": set(), "case": set(), "decision": set()}
     for b in blocks:
         if b["type"] == "concept":
+            keep["concept"].add(f"{b['label']}.md")
             write_page(ROOT / "wiki" / "concepts" / f"{b['label']}.md", render_page(b), report)
         elif b["type"] == "rule":
+            keep["rule"].add(f"{b['label']}.md")
             write_page(ROOT / "wiki" / "rules" / f"{b['label']}.md", render_page(b), report)
         elif b["type"] == "case":
+            keep["case"].add(f"{b['label']}.md")
             write_page(ROOT / "wiki" / "cases" / f"{b['label']}.md", render_page(b), report)
         elif b["type"] == "decision":
+            keep["decision"].add(f"{b['id']}.md")
             write_page(ROOT / "wiki" / "decisions" / f"{b['id']}.md", render_page(b), report)
+    for sub in keep:
+        prune_stale(DIRS[sub], keep[sub], report)
 
     # 总览
     counts = {}
@@ -421,7 +456,13 @@ def sync_wiki(g: Graph, blocks: list[dict]) -> list[str]:
     lines.append("")
     lines.append("## 说明")
     lines.append("")
-    lines.append("概念层与规则层当前为空，原因见 `INDEX.md` §0 与 `records/escalation/ESC-0002`。")
+    if counts.get("concept", 0) and not counts.get("rule", 0):
+        lines.append(f"概念层已有 {counts.get('concept', 0)} 个概念，全部来自负责人投递的整理件"
+                     "（`溯源-投递材料`），因此均为「候选」，**不构成确定答案**。")
+        lines.append("规则层与案例层当前为空，原因见 `INDEX.md` §0 与 "
+                     "`records/escalation/ESC-0002`（权威材料未到位）。")
+    else:
+        lines.append("规模与门禁分布见上表；来源与状态以各页头部字段为准。")
     lines.append("")
     write_page(ROOT / "wiki" / "index.md", "\n".join(lines), report)
     return report

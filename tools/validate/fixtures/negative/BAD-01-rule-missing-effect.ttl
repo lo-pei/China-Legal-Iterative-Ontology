@@ -1,0 +1,32 @@
+# EXPECT: E-RULE-02
+# 反例：规则结构齐全但缺 law:具有效果。门禁应拦住——没有效果的规则不是规则。
+@prefix law:  <https://ontology.law-cn.internal/mcl#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+law:试模态甲 a law:义务 ;
+    law:模态对象 "支付价款" ;
+    law:溯源状态 law:溯源-自建设计 .
+
+law:试版本甲 a law:规范文本版本 ;
+    law:生效日期 "2021-01-01"^^xsd:date ;
+    law:文本定位 "第595条" ;
+    law:溯源状态 law:溯源-自建设计 .
+
+law:试要件甲 a law:构成要件 ;
+    law:要件序号 1 ;
+    law:要件文本 "合同成立" ;
+    law:开放纹理 false ;
+    law:消极要件 false ;
+    law:溯源状态 law:溯源-自建设计 .
+
+law:试规则甲 a law:规则 ;
+    rdfs:label "试规则甲"@zh ;
+    law:具有要件 law:试要件甲 ;
+    law:归属规范类型 law:类型-主要规范 ;
+    law:证成状态 law:证成-待检验 ;
+    law:具有模态 law:试模态甲 ;
+    law:隶属版本 law:试版本甲 ;
+    law:溯源状态 law:溯源-自建设计 ;
+    law:判断状态 law:状态-候选 .

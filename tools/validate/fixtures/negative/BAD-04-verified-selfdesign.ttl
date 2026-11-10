@@ -1,0 +1,35 @@
+# EXPECT: E-PROV-01
+# 反例：判断状态=已验证 但溯源状态=自建设计。这是系统自证，整个门禁的可信度系于此条。
+@prefix law:  <https://ontology.law-cn.internal/mcl#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+law:试要件乙 a law:构成要件 ;
+    law:要件序号 1 ;
+    law:要件文本 "占位" ;
+    law:开放纹理 false ;
+    law:消极要件 false ;
+    law:溯源状态 law:溯源-自建设计 .
+
+law:试词表乙 a law:因子词表项 ;
+    law:因子编号 "F-9001" ;
+    law:因子名称 "占位因子" ;
+    law:锚定要件 law:试要件乙 ;
+    law:溯源状态 law:溯源-自建设计 .
+
+law:试因子乙 a law:法律因子 ;
+    law:因子对应词表项 law:试词表乙 ;
+    law:具有极性 law:极性-正向 ;
+    law:标注者 "反例样本" ;
+    law:证据定位 "无" ;
+    law:溯源状态 law:溯源-自建设计 .
+
+law:试关键事实乙 a law:关键事实 ;
+    law:填充要件 law:试要件乙 ;
+    law:支撑因子 law:试因子乙 ;
+    law:推导路径 "占位" ;
+    law:标注者 "反例样本" ;
+    law:复核者 "反例复核" ;
+    law:判断状态 law:状态-已验证 ;
+    law:溯源状态 law:溯源-自建设计 .

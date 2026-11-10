@@ -5,114 +5,182 @@
 # 命名统一加语义前缀（状态-/证成-/类型-/效果-/废止-/极性-/结论-/模式-/溯源-），
 # 目的是与阶段 2 起将建立的法律概念（如 law:给付、law:解除）在 IRI 空间上隔离，
 # 避免「同名不同物」。此约定登记于 SCHEMA.md §4。
+#
+# SKOS 承载（ADR-0013 §2.4）：各词表为 skos:ConceptScheme，值为 skos:Concept。
+#   skos:notation 承载机器可读的英文 token —— ADR-0007 §2.1 要求「英文值保留为别名，
+#   便于外部工具互操作」，此前只写在 rdfs:comment 的中文句内，外部工具取不到。
+# rdfs:label 保留为人类标签，不重复写 skos:prefLabel（避免同义双写）。
+# law:效果-* 不加 notation：给付/形成/确认/责任的英文对应在比较法上有分歧，
+#   属概念层术语选择，留待规范原文（ADR-0013 §2.4）。
 
 @prefix law:  <https://ontology.law-cn.internal/mcl#> .
 @prefix owl:  <http://www.w3.org/2002/07/owl#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
 
 # ---------------------------------------------------------------------------
 # 轴一：溯源状态（来源类型，不是「可信度」）
 # ---------------------------------------------------------------------------
 
+law:词表-溯源状态 a skos:ConceptScheme ;
+    rdfs:label "溯源状态词表"@zh ;
+    rdfs:comment "断言来源类型的受控词表。六个值，互斥。"@zh .
+
 law:溯源状态值 a owl:Class ;
     rdfs:label "溯源状态值"@zh ;
     rdfs:comment "断言来源的类型。与判断状态严格分离：来源没有「verified」这种取值（ADR-0007 §1）。"@zh .
 
-law:溯源-权威材料 a law:溯源状态值 ;
+law:溯源-权威材料 a law:溯源状态值, skos:Concept ;
     rdfs:label "溯源-权威材料"@zh ;
+    skos:inScheme law:词表-溯源状态 ;
+    skos:notation "authoritative-material" ;
     rdfs:comment "raw/authority/ 内的项目负责人提供材料。"@zh .
 
-law:溯源-负责人裁定 a law:溯源状态值 ;
+law:溯源-投递材料 a law:溯源状态值, skos:Concept ;
+    rdfs:label "溯源-投递材料"@zh ;
+    skos:inScheme law:词表-溯源状态 ;
+    skos:notation "submitted-material" ;
+    rdfs:comment "负责人投递的整理件（清单、释义、汇总表），非规范原文、非 raw/authority 原件。只能支撑「候选」，永远不得支撑「已验证」（ADR-0012 §2）。与「未溯源」的区别：有明确投递人与文件指纹（PROV 登记），只是材料强度低于权威材料。"@zh ;
+    law:锚定计划书条款 "§一.6, §阶段2" .
+
+law:溯源-负责人裁定 a law:溯源状态值, skos:Concept ;
     rdfs:label "溯源-负责人裁定"@zh ;
+    skos:inScheme law:词表-溯源状态 ;
+    skos:notation "owner-ruling" ;
     rdfs:comment "records/escalation/ 中已 resolved 的 ESC resolution。"@zh .
 
-law:溯源-测试集结论 a law:溯源状态值 ;
+law:溯源-测试集结论 a law:溯源状态值, skos:Concept ;
     rdfs:label "溯源-测试集结论"@zh ;
+    skos:inScheme law:词表-溯源状态 ;
+    skos:notation "testset-conclusion" ;
     rdfs:comment "已通过阶段验收的测试集结论。注意：测试集结果本身只写 records/acc/，只有「通过验收」的结论才可反向作为溯源依据（§9.1 第 3 条）。"@zh .
 
-law:溯源-自建设计 a law:溯源状态值 ;
+law:溯源-自建设计 a law:溯源状态值, skos:Concept ;
     rdfs:label "溯源-自建设计"@zh ;
+    skos:inScheme law:词表-溯源状态 ;
+    skos:notation "self-design" ;
     rdfs:comment "系统自建的元设计/结构断言。不得用于法律实质结论（ADR-0007 §2.4）。"@zh .
 
-law:溯源-未溯源 a law:溯源状态值 ;
+law:溯源-未溯源 a law:溯源状态值, skos:Concept ;
     rdfs:label "溯源-未溯源"@zh ;
+    skos:inScheme law:词表-溯源状态 ;
+    skos:notation "untraceable" ;
     rdfs:comment "占位或无来源。禁止进入任何表示层。"@zh .
 
 law:溯源状态 a owl:ObjectProperty ;
     rdfs:label "溯源状态"@zh ;
     rdfs:range law:溯源状态值 ;
-    rdfs:comment "一切进入 ontology/ 的断言都应携带。"@zh .
+    rdfs:comment "一切进入 ontology/ 的断言都应携带。有意省略 domain：被构件类与法律概念类共同使用，且两者不相交，声明单一 domain 会使 rdfs 推理产生错误的类型归属。"@zh .
 
 # ---------------------------------------------------------------------------
-# 轴二：判断状态（仅法律实质判断）。英文别名保留在此，供外部工具映射。
+# 轴二：判断状态（仅法律实质判断）
 # ---------------------------------------------------------------------------
+
+law:词表-判断状态 a skos:ConceptScheme ;
+    rdfs:label "判断状态词表"@zh ;
+    rdfs:comment "法律判断认识论状态的受控词表。五值，互斥。英文 token 与 ADR-0007 §2.1 的对应表一致。"@zh .
 
 law:判断状态值 a owl:Class ;
     rdfs:label "判断状态值"@zh ;
-    rdfs:comment "法律判断的认识论状态。五值。英文别名：verified / candidate / pending-escalation / disputed / rejected。"@zh .
+    rdfs:comment "法律判断的认识论状态。五值。英文 token 见各值的 skos:notation。"@zh .
 
-law:状态-已验证 a law:判断状态值 ;
+law:状态-已验证 a law:判断状态值, skos:Concept ;
     rdfs:label "已验证"@zh ;
+    skos:inScheme law:词表-判断状态 ;
+    skos:notation "verified" ;
     rdfs:comment "有 verified 知识支撑，无争议。来源必须是权威材料/负责人裁定/测试集结论。"@zh .
 
-law:状态-候选 a law:判断状态值 ;
+law:状态-候选 a law:判断状态值, skos:Concept ;
     rdfs:label "候选"@zh ;
+    skos:inScheme law:词表-判断状态 ;
+    skos:notation "candidate" ;
     rdfs:comment "系统提议，待专家复核或待测试集检验。Wiki 标记存在，RAG 不作确定答案。"@zh .
 
-law:状态-待裁定 a law:判断状态值 ;
+law:状态-待裁定 a law:判断状态值, skos:Concept ;
     rdfs:label "待裁定"@zh ;
+    skos:inScheme law:词表-判断状态 ;
+    skos:notation "pending-escalation" ;
     rdfs:comment "系统无法裁定，已升级给项目负责人。不得进入确定性表示层（§4.3）。"@zh .
 
-law:状态-有争议 a law:判断状态值 ;
+law:状态-有争议 a law:判断状态值, skos:Concept ;
     rdfs:label "有争议"@zh ;
+    skos:inScheme law:词表-判断状态 ;
+    skos:notation "disputed" ;
     rdfs:comment "存在未关闭争议。仅 RSK/ESC 中存在，不进入 Wiki 与 RAG。"@zh .
 
-law:状态-已否定 a law:判断状态值 ;
+law:状态-已否定 a law:判断状态值, skos:Concept ;
     rdfs:label "已否定"@zh ;
+    skos:inScheme law:词表-判断状态 ;
+    skos:notation "rejected" ;
     rdfs:comment "已被裁定否定。保留记录供追溯，不返回。"@zh .
 
 law:判断状态 a owl:ObjectProperty ;
     rdfs:label "判断状态"@zh ;
     rdfs:range law:判断状态值 ;
-    rdfs:comment "仅用于法律实质判断节点。元设计断言不带本属性（ADR-0007 §2.2）。"@zh .
+    rdfs:comment "仅用于法律实质判断节点。元设计断言不带本属性（ADR-0007 §2.2）。有意省略 domain：适用节点类型分散在事实层/案例层/适用层，单一声明会误推类型。"@zh .
 
 # ---------------------------------------------------------------------------
 # 轴三：证成状态（仅规则）
 # ---------------------------------------------------------------------------
 
-law:证成状态值 a owl:Class ;
-    rdfs:label "证成状态值"@zh .
+law:词表-证成状态 a skos:ConceptScheme ;
+    rdfs:label "证成状态词表"@zh ;
+    rdfs:comment "规则作为规范主张之确立程度的受控词表。两值。"@zh .
 
-law:证成-已确立 a law:证成状态值 ;
+law:证成状态值 a owl:Class ;
+    rdfs:label "证成状态值"@zh ;
+    rdfs:comment "仅 law:规则 使用。与判断状态的区别见 ADR-0007 §3。"@zh .
+
+law:证成-已确立 a law:证成状态值, skos:Concept ;
     rdfs:label "已确立"@zh ;
+    skos:inScheme law:词表-证成状态 ;
+    skos:notation "established" ;
     rdfs:comment "规则作为规范主张已确立（成文规则，有权威来源）。"@zh .
 
-law:证成-待检验 a law:证成状态值 ;
+law:证成-待检验 a law:证成状态值, skos:Concept ;
     rdfs:label "待检验"@zh ;
+    skos:inScheme law:词表-证成状态 ;
+    skos:notation "pending-test" ;
     rdfs:comment "候选规则，尚未通过归纳检验。"@zh .
 
 # ---------------------------------------------------------------------------
-# 其他受控词表
+# 规范类型
 # ---------------------------------------------------------------------------
 
-law:规范类型值 a owl:Class ;
-    rdfs:label "规范类型值"@zh .
+law:词表-规范类型 a skos:ConceptScheme ;
+    rdfs:label "规范类型词表"@zh ;
+    rdfs:comment "按推理功能位划分的规范类型（主要/辅助/防御）。"@zh .
 
-law:类型-主要规范 a law:规范类型值 ;
+law:规范类型值 a owl:Class ;
+    rdfs:label "规范类型值"@zh ;
+    rdfs:comment "规范按推理功能位划分的取值类型：直接产生请求权、解释补充、对抗请求权。三值互斥，由 ADR-0002 与 tbox 20 号文件共同约束。"@zh .
+
+law:类型-主要规范 a law:规范类型值, skos:Concept ;
     rdfs:label "主要规范"@zh ;
+    skos:inScheme law:词表-规范类型 ;
+    skos:notation "primary-norm" ;
     rdfs:comment "直接产生请求权的规范。"@zh .
 
-law:类型-辅助规范 a law:规范类型值 ;
+law:类型-辅助规范 a law:规范类型值, skos:Concept ;
     rdfs:label "辅助规范"@zh ;
+    skos:inScheme law:词表-规范类型 ;
+    skos:notation "auxiliary-norm" ;
     rdfs:comment "解释、补充主要规范的规范（如司法解释条文）。"@zh .
 
-law:类型-防御规范 a law:规范类型值 ;
+law:类型-防御规范 a law:规范类型值, skos:Concept ;
     rdfs:label "防御规范"@zh ;
+    skos:inScheme law:词表-规范类型 ;
+    skos:notation "defensive-norm" ;
     rdfs:comment "对抗请求权的规范（抗辩、抗辩权、权利阻碍）。"@zh .
 
+# ---------------------------------------------------------------------------
+# 效果类型（暂不设 skos:notation，理由见文件头）
+# ---------------------------------------------------------------------------
+
 law:效果类型值 a owl:Class ;
-    rdfs:label "效果类型值"@zh .
+    rdfs:label "效果类型值"@zh ;
+    rdfs:comment "法律效果的类型取值。英文 token 待规范原文到位后确定（ADR-0013 §2.4）。"@zh .
 
 law:效果-给付 a law:效果类型值 ;
     rdfs:label "给付"@zh ;
@@ -130,142 +198,217 @@ law:效果-责任 a law:效果类型值 ;
     rdfs:label "责任"@zh ;
     rdfs:comment "损害赔偿、违约金等责任承担。"@zh .
 
-law:废止类型值 a owl:Class ;
-    rdfs:label "废止类型值"@zh .
+# ---------------------------------------------------------------------------
+# 废止类型
+# ---------------------------------------------------------------------------
 
-law:废止-后法 a law:废止类型值 ;
+law:词表-废止类型 a skos:ConceptScheme ;
+    rdfs:label "废止类型词表"@zh ;
+    rdfs:comment "外部效力消灭的类型（ADR-0004）。注意与「要件不成立」区分：后者是不适用，不是效力消灭。"@zh .
+
+law:废止类型值 a owl:Class ;
+    rdfs:label "废止类型值"@zh ;
+    rdfs:comment "规范外部效力消灭的类型取值（ADR-0004）。与「消极要件」严格区分：后者是规则内部的但书例外，不是废止。"@zh .
+
+law:废止-后法 a law:废止类型值, skos:Concept ;
     rdfs:label "后法废止"@zh ;
+    skos:inScheme law:词表-废止类型 ;
+    skos:notation "later-law" ;
     rdfs:comment "同一规范层级上，后法废止前法。"@zh .
 
-law:废止-上位法 a law:废止类型值 ;
-    rdfs:label "上位法废止"@zh .
+law:废止-上位法 a law:废止类型值, skos:Concept ;
+    rdfs:label "上位法废止"@zh ;
+    skos:inScheme law:词表-废止类型 ;
+    skos:notation "higher-law" .
 
-law:废止-特别法优先 a law:废止类型值 ;
+law:废止-特别法优先 a law:废止类型值, skos:Concept ;
     rdfs:label "特别法优先"@zh ;
+    skos:inScheme law:词表-废止类型 ;
+    skos:notation "lex-specialis" ;
     rdfs:comment "必填 law:优先规则，否则无从裁断（E-DEF-02）。"@zh .
 
-law:废止-目的性限缩 a law:废止类型值 ;
-    rdfs:label "目的性限缩"@zh .
+law:废止-目的性限缩 a law:废止类型值, skos:Concept ;
+    rdfs:label "目的性限缩"@zh ;
+    skos:inScheme law:词表-废止类型 ;
+    skos:notation "teleological-restriction" .
 
-law:废止-约定排除 a law:废止类型值 ;
+law:废止-约定排除 a law:废止类型值, skos:Concept ;
     rdfs:label "约定排除"@zh ;
+    skos:inScheme law:词表-废止类型 ;
+    skos:notation "contractual-exclusion" ;
     rdfs:comment "当事人以意思表示排除任意性规范的适用。"@zh .
 
-law:废止-要件不成立 a law:废止类型值 ;
+law:废止-要件不成立 a law:废止类型值, skos:Concept ;
     rdfs:label "要件不成立"@zh ;
+    skos:inScheme law:词表-废止类型 ;
+    skos:notation "element-not-satisfied" ;
     rdfs:comment "规则表面适用但某要件被否定，导致效果不发生。注意：这是「不适用」而非「效力消灭」，用于与真正的废止区分。"@zh .
 
-law:极性值 a owl:Class ;
-    rdfs:label "极性值"@zh .
+# ---------------------------------------------------------------------------
+# 极性
+# ---------------------------------------------------------------------------
 
-law:极性-正向 a law:极性值 ;
+law:词表-极性 a skos:ConceptScheme ;
+    rdfs:label "极性词表"@zh ;
+    rdfs:comment "因子对要件成立之指向的受控词表。注意：本词表描述的是指向，不是事实真假。"@zh .
+
+law:极性值 a owl:Class ;
+    rdfs:label "极性值"@zh ;
+    rdfs:comment "因子对要件成立之指向的类型取值。当前为单值约束（E-FAC-03），同一因子无法对不同要件赋相反极性，见 RSK-0008。"@zh .
+
+law:极性-正向 a law:极性值, skos:Concept ;
     rdfs:label "正向"@zh ;
+    skos:inScheme law:词表-极性 ;
+    skos:notation "positive" ;
     rdfs:comment "该因子指向要件成立。"@zh .
 
-law:极性-负向 a law:极性值 ;
+law:极性-负向 a law:极性值, skos:Concept ;
     rdfs:label "负向"@zh ;
+    skos:inScheme law:词表-极性 ;
+    skos:notation "negative" ;
     rdfs:comment "该因子指向要件不成立。"@zh .
 
-law:极性-中性 a law:极性值 ;
+law:极性-中性 a law:极性值, skos:Concept ;
     rdfs:label "中性"@zh ;
-    rdfs:comment "指向不明或需结合其他因子判断。取中性时必须记录理由。"@zh .
+    skos:inScheme law:词表-极性 ;
+    skos:notation "neutral" ;
+    rdfs:comment "指向不明或需结合其他因子判断。取中性时必须记录理由。当前单值约束下的表达力限制见 RSK-0008。"@zh .
+
+# ---------------------------------------------------------------------------
+# 判定结论
+# ---------------------------------------------------------------------------
+
+law:词表-判定结论 a skos:ConceptScheme ;
+    rdfs:label "判定结论词表"@zh ;
+    rdfs:comment "要件判定结论的受控词表。四值，其中「无法裁定」触发 ESC。"@zh .
 
 law:判定结论值 a owl:Class ;
-    rdfs:label "判定结论值"@zh .
+    rdfs:label "判定结论值"@zh ;
+    rdfs:comment "要件判定结论的类型取值。取「无法裁定」时节点必须置待裁定并写 ESC（E-ESC-01）。"@zh .
 
-law:结论-满足 a law:判定结论值 ;
-    rdfs:label "满足"@zh .
+law:结论-满足 a law:判定结论值, skos:Concept ;
+    rdfs:label "满足"@zh ;
+    skos:inScheme law:词表-判定结论 ;
+    skos:notation "satisfied" .
 
-law:结论-不满足 a law:判定结论值 ;
-    rdfs:label "不满足"@zh .
+law:结论-不满足 a law:判定结论值, skos:Concept ;
+    rdfs:label "不满足"@zh ;
+    skos:inScheme law:词表-判定结论 ;
+    skos:notation "not-satisfied" .
 
-law:结论-待证 a law:判定结论值 ;
+law:结论-待证 a law:判定结论值, skos:Concept ;
     rdfs:label "待证"@zh ;
+    skos:inScheme law:词表-判定结论 ;
+    skos:notation "to-be-proven" ;
     rdfs:comment "事实不足，尚不能判断。"@zh .
 
-law:结论-无法裁定 a law:判定结论值 ;
+law:结论-无法裁定 a law:判定结论值, skos:Concept ;
     rdfs:label "无法裁定"@zh ;
+    skos:inScheme law:词表-判定结论 ;
+    skos:notation "undeterminable" ;
     rdfs:comment "法律实质判断超出系统能力。取此值时节点必须置待裁定并写 ESC（E-ESC-01）。"@zh .
 
-law:推理模式值 a owl:Class ;
-    rdfs:label "推理模式值"@zh .
+# ---------------------------------------------------------------------------
+# 推理模式
+# ---------------------------------------------------------------------------
 
-law:模式-演绎涵摄 a law:推理模式值 ;
+law:词表-推理模式 a skos:ConceptScheme ;
+    rdfs:label "推理模式词表"@zh ;
+    rdfs:comment "四种推理模式的受控词表。类比/归纳产出必须被演绎消费（§一.4）。"@zh .
+
+law:推理模式值 a owl:Class ;
+    rdfs:label "推理模式值"@zh ;
+    rdfs:comment "四种推理模式的类型取值。演绎涵摄为验证骨架，类比与归纳的产出必须被演绎消费（W-UNCOUPLED）。"@zh .
+
+law:模式-演绎涵摄 a law:推理模式值, skos:Concept ;
     rdfs:label "演绎涵摄"@zh ;
+    skos:inScheme law:词表-推理模式 ;
+    skos:notation "deductive-subsumption" ;
     rdfs:comment "以规则要件为大前提、关键事实为小前提推出结论。验证骨架。"@zh .
 
-law:模式-类比迁移 a law:推理模式值 ;
+law:模式-类比迁移 a law:推理模式值, skos:Concept ;
     rdfs:label "类比迁移"@zh ;
+    skos:inScheme law:词表-推理模式 ;
+    skos:notation "analogical-transfer" ;
     rdfs:comment "产生候选涵摄前提，供演绎消费。"@zh .
 
-law:模式-归纳提炼 a law:推理模式值 ;
+law:模式-归纳提炼 a law:推理模式值, skos:Concept ;
     rdfs:label "归纳提炼"@zh ;
+    skos:inScheme law:词表-推理模式 ;
+    skos:notation "inductive-generalization" ;
     rdfs:comment "从重复出现的类比模式中提炼候选规则。"@zh .
 
-law:模式-归纳检验 a law:推理模式值 ;
+law:模式-归纳检验 a law:推理模式值, skos:Concept ;
     rdfs:label "归纳检验"@zh ;
+    skos:inScheme law:词表-推理模式 ;
+    skos:notation "inductive-testing" ;
     rdfs:comment "以反例与测试集检验候选规则，调整证成状态。"@zh .
 
 # ---------------------------------------------------------------------------
 # 溯源与标注的通用属性
+# 标注者/复核者/标注时间/受裁定于/受争议于 属溯源链元数据（SCHEMA §5.3），
+# 不是法律事实内容，故为注释属性（ADR-0013 §2.3）。
 # ---------------------------------------------------------------------------
 
-law:标注者 a owl:DatatypeProperty ;
+law:标注者 a owl:AnnotationProperty ;
     rdfs:label "标注者"@zh ;
-    rdfs:range xsd:string .
+    rdfs:range xsd:string ;
+    rdfs:comment "标注执行者。属溯源链元数据，非法律事实。"@zh .
 
-law:复核者 a owl:DatatypeProperty ;
+law:复核者 a owl:AnnotationProperty ;
     rdfs:label "复核者"@zh ;
     rdfs:range xsd:string ;
-    rdfs:comment "必须与标注者不同主体（W-SELFREVIEW，见 RSK-0002）。"@zh .
+    rdfs:comment "必须与标注者不同主体（W-SELFREVIEW，见 RSK-0002）。转为注释属性后 SHACL 约束仍生效（ADR-0013 §2.3）。"@zh .
 
-law:标注时间 a owl:DatatypeProperty ;
+law:标注时间 a owl:AnnotationProperty ;
     rdfs:label "标注时间"@zh ;
     rdfs:range xsd:date .
 
-law:来源定位 a owl:DatatypeProperty ;
+law:来源定位 a owl:AnnotationProperty ;
     rdfs:label "来源定位"@zh ;
     rdfs:range xsd:string ;
     rdfs:comment "指向 raw/ 内文件与区间的定位串。"@zh .
 
-law:来源文本 a owl:DatatypeProperty ;
+law:来源文本 a owl:AnnotationProperty ;
     rdfs:label "来源文本"@zh ;
     rdfs:range xsd:string ;
     rdfs:comment "概念的来源文本（§5.1 概念最小必填）。"@zh .
 
-law:锚定能力问题 a owl:DatatypeProperty ;
+law:锚定能力问题 a owl:AnnotationProperty ;
     rdfs:label "锚定能力问题"@zh ;
     rdfs:range xsd:string ;
     rdfs:comment "形如 CQ-D01。无锚定的概念为「悬浮」，禁止入库（§5.2 门禁 1）。"@zh .
 
-law:定义 a owl:DatatypeProperty ;
+law:定义 a owl:AnnotationProperty ;
     rdfs:label "定义"@zh ;
-    rdfs:range xsd:string .
+    rdfs:range xsd:string ;
+    rdfs:comment "概念的释义文本。注释性质：它描述这个术语怎么用，不是关于世界的断言。"@zh .
 
-law:示例 a owl:DatatypeProperty ;
+law:示例 a owl:AnnotationProperty ;
     rdfs:label "示例"@zh ;
     rdfs:range xsd:string .
 
 law:上位概念 a owl:ObjectProperty ;
     rdfs:label "上位概念"@zh ;
     rdfs:range law:法律概念 ;
-    rdfs:comment "概念层级的显式声明。与 rdfs:subClassOf 冗余，用于人类审阅与环检测的独立证据。"@zh .
+    rdfs:comment "概念层级的显式声明。与 rdfs:subClassOf 冗余，用于人类审阅与环检测的独立证据。两者不一致时报 E-TERM-06。"@zh .
 
-law:曾用标识符 a owl:DatatypeProperty ;
+law:曾用标识符 a owl:AnnotationProperty ;
     rdfs:label "曾用标识符"@zh ;
     rdfs:range xsd:string ;
     rdfs:comment "重命名记录。只允许废弃+新增，标识符不得原地改名（ADR-0005）。"@zh .
 
-law:同义于 a owl:ObjectProperty ;
+law:同义于 a owl:ObjectProperty, owl:SymmetricProperty ;
     rdfs:label "同义于"@zh ;
-    rdfs:comment "同义概念互指，不新建 IRI（ADR-0005 §4）。"@zh .
+    rdfs:range law:法律概念 ;
+    rdfs:comment "同义概念互指，不新建 IRI（ADR-0005 §4）。对称关系：A 同义于 B 蕴含 B 同义于 A。range 限法律概念：元层受控值之间的同义关系应通过 skos:notation 或 ESC 裁定处理，不得借此跨轴并联。"@zh .
 
-law:受裁定于 a owl:DatatypeProperty ;
+law:受裁定于 a owl:AnnotationProperty ;
     rdfs:label "受裁定于"@zh ;
     rdfs:range xsd:string ;
     rdfs:comment "指向 ESC 编号。判断状态=待裁定 时必须存在且对应 ESC 为 open 或已 resolved（E-ESC-01）。"@zh .
 
-law:受争议于 a owl:DatatypeProperty ;
+law:受争议于 a owl:AnnotationProperty ;
     rdfs:label "受争议于"@zh ;
     rdfs:range xsd:string ;
     rdfs:comment "指向 RSK 编号。判断状态=有争议 时必填（E-RSK-01）。"@zh .

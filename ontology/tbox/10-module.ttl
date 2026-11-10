@@ -7,8 +7,9 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
 law:模块 a owl:Class ;
+    rdfs:subClassOf law:法律概念 ;
     rdfs:label "模块"@zh ;
-    rdfs:comment "按推理链功能位划分的法律概念分区。一个法律概念必须且只能归属一个模块。"@zh ;
+    rdfs:comment "按推理链功能位划分的法律概念分区。一个法律概念必须且只能归属一个模块。模块自身是概念分类树的分区节点，故以 law:法律概念 为上位类（ADR-0012 §2.7 修补：缺此声明则「概念→模块→法律概念」的类链断开，任何从法律概念根类出发的检索与校验都会漏掉全部概念）。"@zh ;
     law:锚定计划书条款 "§4.1" .
 
 law:主体模块 a owl:Class ;

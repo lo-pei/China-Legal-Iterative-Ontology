@@ -41,9 +41,10 @@ law:置信度 a owl:DatatypeProperty ;
     rdfs:range xsd:decimal ;
     rdfs:comment "抽取置信度，0–1。不是判断状态：置信度高不等于法律上成立。"@zh .
 
-law:抽取者 a owl:DatatypeProperty ;
+law:抽取者 a owl:AnnotationProperty ;
     rdfs:label "抽取者"@zh ;
-    rdfs:range xsd:string .
+    rdfs:range xsd:string ;
+    rdfs:comment "执行事实抽取的主体。属溯源链元数据（与 law:标注者 同类），非法律事实内容（ADR-0013 §2.3）。"@zh .
 
 # ---------------------------------------------------------------------------
 # 因子词表项（词表层，自下而上收敛，§阶段 4）

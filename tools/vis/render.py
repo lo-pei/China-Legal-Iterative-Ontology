@@ -75,7 +75,10 @@ def main() -> int:
     g = load()
     classes = set(g.subjects(RDF.type, OWL.Class)) | set(g.subjects(RDF.type, RDFS.Class))
     comp = {c for c in classes if L["构件"] in parents(g, c)}
-    concepts = {c for c in classes if L["法律概念"] in parents(g, c) and c != L["法律概念"]}
+    concepts = {c for c in classes
+                if L["法律概念"] in parents(g, c) and c != L["法律概念"]
+                and str(c).replace(NS, "") not in {m[0] for m in MODULES}
+                and c != L["模块"]}
 
     stats, errors = health()
 
@@ -113,16 +116,40 @@ def main() -> int:
             inner += "<ul>" + "".join(f"<li>{tree(k, depth + 1)}</li>" for k in kids) + "</ul>"
         return inner
 
-    # 模块区
+    # 模块区（概念按原清单分组折叠，避免 445 个词条平铺成墙）
+    STATUS_CLASS = {"状态-候选": "cand", "状态-待裁定": "pending", "状态-已否定": "rejected"}
+
+    def chip(c):
+        js = one(g.objects(c, L["判断状态"]))
+        cls = STATUS_CLASS.get(str(js).replace(NS, "") if js else "", "")
+        return f'<div class="chip {cls}">{html.escape(label_of(g, c))}</div>'
+
     module_html = []
     for name, color, desc in MODULES:
         cls = L[name]
         kids = sorted({c for c in concepts if cls in parents(g, c)}, key=lambda x: label_of(g, x))
-        body = "".join(f'<div class="chip">{html.escape(label_of(g, c))}</div>' for c in kids) \
-            or '<div class="empty">尚无概念（等待 raw/authority/）</div>'
+        if kids:
+            groups = {}
+            for c in kids:
+                grp = one(g.objects(c, L["原清单分组"]))
+                groups.setdefault(str(grp) if grp else "未分组", []).append(c)
+            body = "".join(
+                f'<details><summary>{html.escape(grp)}<i>{len(items)}</i></summary>'
+                f'<div class="chips">{"".join(chip(c) for c in items)}</div></details>'
+                for grp, items in sorted(groups.items()))
+        else:
+            body = '<div class="empty">尚无概念</div>'
         module_html.append(
             f'<section class="module" style="--mc:{color}">'
-            f'<h3><span class="dot"></span>{name}<small>{desc}</small></h3>{body}</section>')
+            f'<h3><span class="dot"></span>{name}<small>{desc} · {len(kids)}</small></h3>{body}</section>')
+
+    # 待裁定区（模块未定的概念不得悄悄消失）
+    pending = sorted({c for c in concepts if one(g.objects(c, L["判断状态"])) == L["状态-待裁定"]},
+                     key=lambda x: label_of(g, x))
+    pending_html = "".join(
+        f'<div class="chip pending">{html.escape(label_of(g, c))}'
+        f'<small>{html.escape(str(one(g.objects(c, L["受裁定于"])) or ""))}</small></div>'
+        for c in pending) or '<div class="empty">无待裁定概念</div>'
 
     # 规则与冲突
     rules = list(g.subjects(RDF.type, L["规则"]))
@@ -139,7 +166,7 @@ def main() -> int:
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<title>法律本体 · 结构与健康度</title>
+<title>CLIO · 结构与健康度</title>
 <style>
   :root {{
     --bg:#F7F8FA; --panel:#FFFFFF; --ink:#1A1D23; --ink2:#5B6472; --line:#E3E6EB;
@@ -167,6 +194,17 @@ def main() -> int:
   .chip {{ display:inline-block; padding:3px 9px; margin:3px 4px 3px 0; border-radius:999px;
            background:color-mix(in srgb, var(--mc) 12%, white); border:1px solid var(--mc);
            font-size:12px; }}
+  .chip.cand {{ border-style:dashed; border-color:#5B6472; color:#3C4654; }}
+  .chip.pending {{ border:1px solid var(--red); background:#FFF0F4; color:#8B1E3F; font-weight:600; }}
+  .chip.pending small {{ font-weight:400; color:#B03A63; margin-left:5px; font-size:10px; }}
+  .chip.rejected {{ color:#9AA3AE; text-decoration:line-through; border-color:#ADB5BD; }}
+  details {{ border-top:1px dashed var(--line); padding:4px 0; }}
+  details:first-of-type {{ border-top:none; }}
+  summary {{ cursor:pointer; font-size:12px; color:var(--ink2); padding:2px 0; }}
+  summary i {{ float:right; font-style:normal; color:var(--mc); font-weight:700; }}
+  .chips {{ padding:4px 0 8px; }}
+  .pending-box {{ background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--red);
+                  border-radius:8px; padding:12px 14px; }}
   .empty {{ color:#9AA3AE; font-size:12px; font-style:italic; }}
   .tree ul {{ list-style:none; margin:0; padding-left:20px; border-left:1px dashed var(--line); }}
   .tree > ul {{ padding-left:0; border-left:none; }}
@@ -190,7 +228,7 @@ def main() -> int:
 </head>
 <body>
 <header>
-  <h1>法律本体 · 结构与健康度</h1>
+  <h1>CLIO · 结构与健康度</h1>
   <div class="meta">生成于 {datetime.now().strftime('%Y-%m-%d %H:%M')} ·
     事实源 tbox 指纹 {stats.get('tbox_fingerprint', '')[:16]}… ·
     本页为生成物，修改请改 ontology/ 后重跑 tools/vis/render.py</div>
@@ -211,6 +249,9 @@ def main() -> int:
 
   <h2>五模块（概念分类轴）</h2>
   <div class="modules">{''.join(module_html)}</div>
+
+  <h2>待裁定（模块归属未定，{len(pending)} 项）</h2>
+  <div class="pending-box">{pending_html}</div>
 
   <h2>构件层级（按层归属）</h2>
   <div class="legend" style="margin-bottom:10px">

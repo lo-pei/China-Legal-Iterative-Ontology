@@ -1,0 +1,14 @@
+# EXPECT: E-TERM-02
+# 反例：同一 IRI 既声明为类又声明为属性。无推理机时此类 punning 静默通过，后果迟发。
+@prefix law:  <https://ontology.law-cn.internal/mcl#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+law:试同名甲 a owl:Class ;
+    rdfs:label "试同名甲"@zh ;
+    rdfs:comment "作为类使用"@zh .
+
+law:试同名甲 a owl:DatatypeProperty ;
+    rdfs:label "试同名甲（属性）"@zh ;
+    rdfs:range xsd:string .

@@ -1,0 +1,27 @@
+# CQ-D02 —— 每个要件携带标注（要件ID、开放纹理标记、锚定因子）
+# 违规查询：返回"必填项缺失或类型错误"的要件。期望 0 行。
+# 对应 PLAN/01 §2.1 验收判据：要件必填字段齐全；开放纹理为显式布尔值。
+PREFIX law: <https://ontology.law-cn.internal/mcl#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?要件 ?问题 WHERE {
+  ?要件 a law:构成要件 .
+  {
+    FILTER NOT EXISTS { ?要件 law:要件序号 ?a }
+    BIND("缺 law:要件序号" AS ?问题)
+  } UNION {
+    FILTER NOT EXISTS { ?要件 law:要件文本 ?b }
+    BIND("缺 law:要件文本" AS ?问题)
+  } UNION {
+    FILTER NOT EXISTS { ?要件 law:开放纹理 ?c }
+    BIND("缺 law:开放纹理（未显式声明是否开放纹理）" AS ?问题)
+  } UNION {
+    ?要件 law:开放纹理 ?d .
+    FILTER (datatype(?d) != xsd:boolean)
+    BIND("law:开放纹理 不是 xsd:boolean" AS ?问题)
+  } UNION {
+    FILTER NOT EXISTS { ?要件 law:消极要件 ?e }
+    BIND("缺 law:消极要件（未显式声明是否但书例外）" AS ?问题)
+  }
+}
+ORDER BY ?要件 ?问题

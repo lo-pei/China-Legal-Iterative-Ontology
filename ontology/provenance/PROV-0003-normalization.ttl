@@ -1,0 +1,53 @@
+# PROV-0003-normalization.ttl
+# ADR-0013 批次（本体工程规范化）的溯源登记，兼 0.2.0-civil-code 的最终指纹基线。
+#
+# 登记对象：ADR-0013 §2 的八项 P0 改动，涉及 00 / 30 / 40 / 60 / 70 号文件与三处工具。
+# 与 PROV-0002 的关系：PROV-0002 登记的是「概念层导入」那一段（70 / 71 + 投递件），
+#   其全量指纹是 70 号文件改动后、00/30/40/60 改动前的中间态。
+#   本文件是 0.2.0 的收尾基线；校验器取按文件名排序后的最后一条 law:指纹，
+#   故本文件生效后 PROV-0002 的全量指纹不再被用于比对（其逐文件登记仍然有效）。
+#
+# 概念层指纹未变：本批不改 71 号文件，70 号文件的改动已在 PROV-0002 登记范围内。
+#
+# 本文件不含法律结论（law:非法律结论 true）。它登记的是「文件字节的摘要」，不是法律判断。
+
+@prefix law:  <https://ontology.law-cn.internal/mcl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+law:溯源-规范化批次 a law:溯源登记 ;
+    rdfs:label "本体工程规范化溯源登记 · 0.2.0-civil-code"@zh ;
+    law:覆盖范围 "元模型层：00-namespace / 30-fact / 40-case / 60-states；概念层元数据 70；工具：validate.py / run_cq.py / fixtures" ;
+    law:标注时间 "2026-11-10"^^xsd:date ;
+    law:指纹 "faa7773ff64001eab02c37d2b4ede8d4c7f5dae3115c6441729d654f2e0ee00a" ;
+    law:概念层指纹 "6751eec0ec21afde422c67d036f40f5fbc4a92ad86677727310c073938733d7a" ;
+    law:本体版本 "0.2.0-civil-code" ;
+    law:溯源状态 law:溯源-自建设计 ;
+    law:非法律结论 true ;
+    law:标注者 "执行 Agent（ADR-0013 批次）" ;
+    law:锚定计划书条款 "§5.2, §阶段1, §一.6" ;
+    rdfs:comment "本批改动的性质：结构规范化，不含任何法律概念、模块归属或判断状态变更。八项内容见 ADR-0013 §2：(1) 补 owl:versionIRI 与 dcterms/vann 本体头；(2) 37 个元数据字段由 DatatypeProperty 改为 AnnotationProperty；(3) 元层受控值增 skos:ConceptScheme/skos:inScheme/skos:notation；(4) 新增 E-TERM-01..06 术语卫生检查；(5) 新增 6 个反例样本与 --negative 检出测试；(6) 新增 tools/test/run_cq.py 与 3 条 CQ 查询；(7) 新增 law:有意省略domain 声明机制；(8) 回退 rdfs:isDefinedBy 的全量添加（判断为无信息增量，见 ADR-0013 §4）。**未做的事**：未改任何法律概念的归属与状态；未引入推理机；未设 license（发布前置项）；未做 n 元极性改造（RSK-0008）。"@zh ;
+    law:文件 law:规范化文件-00 ,
+        law:规范化文件-30 ,
+        law:规范化文件-40 ,
+        law:规范化文件-60 .
+
+law:规范化文件-00 a law:溯源文件项 ;
+    law:文件名 "00-namespace.ttl" ;
+    law:文件指纹 "4f71df04b92d8429f772a77837b53592b7ffda406a2a0b4c087f6f63767400e3" ;
+    law:行数 200 .
+
+law:规范化文件-30 a law:溯源文件项 ;
+    law:文件名 "30-fact.ttl" ;
+    law:文件指纹 "2e9774cf696e77783f06af39a93e53a2e6cca74fd2ba230a825e2d2ca30ccb64" ;
+    law:行数 173 .
+
+law:规范化文件-40 a law:溯源文件项 ;
+    law:文件名 "40-case.ttl" ;
+    law:文件指纹 "7e21dd879d78af73a1ef0c722a5051dbfa75d8cc1eb3804bf6ec3eb3b2ed8522" ;
+    law:行数 127 .
+
+law:规范化文件-60 a law:溯源文件项 ;
+    law:文件名 "60-states.ttl" ;
+    law:文件指纹 "d644ce24bbf5482ae6c685c4295d268373fe71f32d3746f5fe90355c683a1945" ;
+    law:行数 414 .

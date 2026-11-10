@@ -1,0 +1,12 @@
+# EXPECT: E-TAX-02
+# 反例：法律概念同时挂两个模块。模块轴声明为 AllDisjointClasses，双挂必属分类错误。
+@prefix law:  <https://ontology.law-cn.internal/mcl#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+law:试概念甲 a owl:Class ;
+    rdfs:subClassOf law:主体模块, law:关系模块 ;
+    rdfs:label "试概念甲"@zh ;
+    law:判断状态 law:状态-候选 ;
+    law:溯源状态 law:溯源-投递材料 .

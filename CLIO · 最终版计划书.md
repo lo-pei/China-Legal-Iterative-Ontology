@@ -198,7 +198,7 @@ project/
 | :----------- | :----------------- | :------------------------ |
 | 架构决策     | `ADR-0001`         | `records/adr/`            |
 | 执行日志     | `LOG-YYYYMMDD-NNN` | `records/log/`            |
-| 概念变更     | `CON-0001`         | `records/con/`            |
+| 概念变更     | `CON-0001`         | `records/concept/`        |
 | 风险/未决    | `RSK-0001`         | `records/rsk/`            |
 | 阶段验收     | `ACC-P{N}-{seq}`   | `records/acc/`            |
 | 变更请求     | `CHG-0001`         | `records/chg/`            |
@@ -418,7 +418,7 @@ markdown
 
 1. records/log/LOG-{YYYYMMDD}-{NNN}.md
 2. 若有决策：records/adr/ADR-{NNNN}.md
-3. 若改了概念：records/con/CON-{NNNN}.md
+3. 若改了概念：records/concept/CON-{NNNN}.md
 4. 若有未决问题：records/rsk/RSK-{NNNN}.md
 5. 若有系统无法裁定的法律判断：records/escalation/ESC-{NNNN}.md
    含：待裁定事项、为何无法裁定、已尝试、阻塞什么、≥2 个建议裁定选项及各自后果、

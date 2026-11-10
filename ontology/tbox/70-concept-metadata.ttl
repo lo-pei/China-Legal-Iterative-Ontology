@@ -1,0 +1,82 @@
+# 70-concept-metadata.ttl
+# 概念层专用元数据词汇（ADR-0012）。
+#
+# 为什么单列一个文件：00–60 号文件是元模型（模块、层、构件、状态词表），70 号起是概念层。
+# 概念层需要的字段（条号、清单统计、分组）与元模型无关，混进 00-namespace 会让「元模型是否漂移」
+# 这一判断失真（CQ-M05）。ADR-0012 §6 据此把指纹口径改为「按版本登记 + 变更须有 CON/ADR」。
+#
+# 本文件不含任何法律实质结论：只声明字段，不声明任何民法典概念。
+# 本文件字段全部为注释属性（ADR-0013 §2.3）：它们登记「这个概念在投递清单中的位置与统计」，
+# 描述建模产物而非法律事实。概念的法律内容由 71 号文件的类断言承载。
+
+@prefix law:  <https://ontology.law-cn.internal/mcl#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# ---------------------------------------------------------------------------
+# 概念层分层标记
+# ---------------------------------------------------------------------------
+
+law:概念层 a owl:Class ;
+    rdfs:label "概念层"@zh ;
+    rdfs:comment "由权威材料或投递材料引入的法律概念类所在的分层。与元模型层（模块/层/构件/状态词表）区分：元模型改动须 ADR，概念层扩充须 CON。"@zh ;
+    law:锚定计划书条款 "§阶段2" .
+
+law:概念层版本 a owl:AnnotationProperty ;
+    rdfs:label "概念层版本"@zh ;
+    rdfs:range xsd:string ;
+    rdfs:comment "概念层批次版本号，与 law:本体版本（元模型版本）并行，互不覆盖。"@zh .
+
+law:概念层指纹 a owl:AnnotationProperty ;
+    rdfs:label "概念层指纹"@zh ;
+    rdfs:range xsd:string ;
+    rdfs:comment "对 ontology/tbox/7*.ttl 按文件名排序拼接取 SHA-256。用于区分「概念层扩充」与「元模型漂移」。"@zh .
+
+# ---------------------------------------------------------------------------
+# 投递材料定位
+# ---------------------------------------------------------------------------
+
+law:投递路径 a owl:AnnotationProperty ;
+    rdfs:label "投递路径"@zh ;
+    rdfs:range xsd:string ;
+    rdfs:comment "负责人投递件的路径。允许位于 raw/ 之外（如工作台目录），但必须写绝对路径与 SHA-256，见 PROV-0002。"@zh .
+
+law:投递件类型 a owl:AnnotationProperty ;
+    rdfs:label "投递件类型"@zh ;
+    rdfs:range xsd:string ;
+    rdfs:comment "整理件 / 规范原文 / 判决书原文 / 测试集。只有「规范原文」可支撑已验证（ADR-0012 §2）。"@zh .
+
+# ---------------------------------------------------------------------------
+# 概念条目字段（由 tools/import/import_civil_code.py 写入）
+# ---------------------------------------------------------------------------
+
+law:规范条号 a owl:AnnotationProperty ;
+    rdfs:label "规范条号"@zh ;
+    rdfs:range xsd:string ;
+    rdfs:comment "概念释义所依据的条文编号（形如「第2条」「第147条至第151条」）。指向条号而非条文全文，故不等于溯源完成。"@zh .
+
+law:原清单分组 a owl:AnnotationProperty ;
+    rdfs:label "原清单分组"@zh ;
+    rdfs:range xsd:string ;
+    rdfs:comment "投递件自身的分组（编/节或主体分组），保留来源结构，供抽样复核与后续细分使用。"@zh .
+
+law:出现次数 a owl:AnnotationProperty ;
+    rdfs:label "出现次数"@zh ;
+    rdfs:range xsd:integer ;
+    rdfs:comment "该词在《民法典》正文（第1—1260条）出现的次数，来自投递清单，未由系统复核。"@zh .
+
+law:涉及条文数 a owl:AnnotationProperty ;
+    rdfs:label "涉及条文数"@zh ;
+    rdfs:range xsd:integer ;
+    rdfs:comment "该词涉及的条文数量，来自投递清单。"@zh .
+
+law:首次出现条号 a owl:AnnotationProperty ;
+    rdfs:label "首次出现条号"@zh ;
+    rdfs:range xsd:string ;
+    rdfs:comment "该词在《民法典》中首次出现的条号，来自投递清单。"@zh .
+
+law:清单备注 a owl:AnnotationProperty ;
+    rdfs:label "清单备注"@zh ;
+    rdfs:range xsd:string ;
+    rdfs:comment "投递清单的备注原文。属于投递人表述，未经系统核验，不得据此作法律判断。"@zh .

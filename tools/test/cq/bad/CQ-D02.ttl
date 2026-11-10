@@ -1,0 +1,10 @@
+# EXPECT: CQ-D02
+# 反例 CQ-D02：一个构成要件缺 law:要件文本，其余必填项齐全且类型正确。
+# 用途：证明 CQ-D02 的查询能真的拦住违规，而不是在干净数据上返回 0 行。
+# 仅在 run_cq.py --selftest 下加载，不进入生产校验图，也不进入事实源。
+@prefix law: <https://ontology.law-cn.internal/mcl#> .
+
+law:反例-要件-缺文本 a law:构成要件 ;
+    law:要件序号 1 ;
+    law:开放纹理 false ;
+    law:消极要件 false .
