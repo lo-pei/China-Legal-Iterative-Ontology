@@ -15,7 +15,7 @@
 | tbox 版本 | `0.1.0-bootstrap`，指纹 `6c0bc9d1de2172e9…`（登记于 `ontology/provenance/PROV-0001`） |
 | 校验状态 | 生产态：`python tools/validate/validate.py` → 0 错误 0 警告；含演练样本：0 错误 5 警告（均为预期信号，见 `LOG-20261110-004` §4） |
 | 事实源规模 | tbox 7 文件 1180 行 + 溯源登记 1 文件；abox 0 实例（无权威材料）；演练样本 1 个（不入事实源） |
-| 记录规模 | 26 份（ADR 11 / LOG 5 / RSK 6 / ESC 3 / ITER 1 / META 1；CON、CHG、ACC 为空并已说明） |
+| 记录规模 | 27 份（ADR 11 / LOG 5 / RSK 6 / ESC 3 / ITER 1 / META 1；CON、CHG、ACC 为空并已说明） |
 
 **一句话**：元设计、校验器、投影管线已跑通并有记录；法律内容为零，因为 `raw/authority/` 为空——这是纪律的结果，不是进度失误。
 
