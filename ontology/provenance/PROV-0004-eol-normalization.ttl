@@ -1,0 +1,63 @@
+# PROV-0004-eol-normalization.ttl
+# 换行符规范化批次的溯源登记，兼 0.2.0-civil-code 的最终指纹基线（取代 PROV-0003 的全量指纹）。
+#
+# 登记对象：将事实源（ontology/tbox、ontology/provenance）的换行符统一为 LF，
+#   并新增 .gitattributes 强制检出行为，使「文件字节」跨平台一致。
+#
+# 为什么需要这一批：
+#   原登记值（PROV-0003 的 faa7773f…、概念层 6751eec0…）是对**特定换行状态**的字节摘要。
+#   其中 00-namespace / 60-states / 71-concepts-civil-code 为 CRLF，其余为 LF。
+#   Git for Windows 默认 core.autocrlf=true 会在检出时把 LF 转 CRLF、或在提交时反向转换，
+#   导致任何 Windows 克隆者实测指纹与登记值不符，触发 W-TBOX-DRIFT。
+#   实测：全新克隆后指纹为 b3fb0e97…，与登记值 faa7773f… 不一致——这不是元设计漂移，而是换行噪声。
+#
+# 本批处置：
+#   1. 事实源全部统一为 LF（4 个文件的 CRLF 被规范化，纯换行改动，零语义变更）。
+#   2. 新增 .gitattributes（* text=auto eol=lf），使 checkout/commit 不再做换行转换。
+#   3. 以 LF 口径重算全量指纹与概念层指纹，登记于本文件。
+#
+# 语义等价性证据：
+#   三元组数 8375 不变、类 489 不变、概念 445 不变、概念定义覆盖 173/452 不变。
+#   Turtle 解析结果在换行改动前后完全一致（空格与换行在 Turtle 中是分隔符，不承载语义）。
+#   本批**不含任何法律结论**，亦不含任何概念、模块归属、判断状态变更。
+#
+# 与 PROV-0003 的关系：本文件按文件名排序在后，校验器取最后一条 law:指纹，
+#   故本文件的全量指纹生效，PROV-0003 的全量指纹退为历史记录（其逐文件登记仍如实反映当时字节）。
+
+@prefix law:  <https://ontology.law-cn.internal/mcl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+law:溯源-换行规范化 a law:溯源登记 ;
+    rdfs:label "换行符规范化与跨平台字节一致性 · 0.2.0-civil-code"@zh ;
+    law:覆盖范围 "ontology/tbox 全部 9 文件；ontology/provenance 全部 3 文件；新增仓库级 .gitattributes" ;
+    law:标注时间 "2026-11-10"^^xsd:date ;
+    law:指纹 "22ff6bd99c824cf557e9ec379b90b29e00d44a3cae1f274843761ebe7bf31753" ;
+    law:概念层指纹 "46e380f625494f51e68a275de3ae1a89ba7c5cbcf522fd073da472f5787d2e77" ;
+    law:本体版本 "0.2.0-civil-code" ;
+    law:溯源状态 law:溯源-自建设计 ;
+    law:非法律结论 true ;
+    law:标注者 "执行 Agent（ADR-0016 批次）" ;
+    law:锚定计划书条款 "§5.2, §阶段1" ;
+    rdfs:comment "本批动机是公开仓库的可复现性：README 声明「0 错误 0 警告」，但原登记值依赖特定换行状态，Windows 克隆者必然失败。修法不是改阈值或补一段说明，而是消除噪声源——统一换行并锁定检出行为。指纹算法未改（仍为原始字节的 SHA-256），因为「字节即身份」这一口径本身是对的；错的是让平台决定字节。**未做的事**：未改任何三元组、类、概念与记录；未改指纹算法；未迁移命名空间（见 ADR-0014 §2.3）。"@zh ;
+    law:文件 law:换行文件-00 ,
+        law:换行文件-60 ,
+        law:换行文件-71 .
+
+law:换行文件-00 a law:溯源文件项 ;
+    law:文件名 "00-namespace.ttl" ;
+    law:文件指纹 "84b6e329ac6b76ba769f35d619dd406e4c736f6902c4e184478b80d6e54e5572" ;
+    law:行数 200 ;
+    rdfs:comment "CRLF → LF；200 行不变。"@zh .
+
+law:换行文件-60 a law:溯源文件项 ;
+    law:文件名 "60-states.ttl" ;
+    law:文件指纹 "70171fd6433114957a7d0e9c04ce2d965842d8c90ef9ea0bd7d4e3a15ec42a40" ;
+    law:行数 414 ;
+    rdfs:comment "CRLF → LF；414 行不变。"@zh .
+
+law:换行文件-71 a law:溯源文件项 ;
+    law:文件名 "71-concepts-civil-code.ttl" ;
+    law:文件指纹 "97258ed237aa57cec46747337c3e6f280c62e2df8f426e2a33410dd0105a3147" ;
+    law:行数 6909 ;
+    rdfs:comment "CRLF → LF；6909 行不变。此文件改动使概念层指纹由 6751eec0… 变为 46e380f6…。"@zh .
